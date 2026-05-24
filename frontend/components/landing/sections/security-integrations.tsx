@@ -12,19 +12,19 @@ type Card = {
   title: string;
   href: string;
   external?: boolean;
-  brand: "equinox-core" | "walrus";
+  brand: "proofpack-core" | "walrus";
 };
 
 const CARDS: Card[] = [
   {
-    title: "Audit-ready",
-    href: "https://github.com/EzraNahumury",
+    title: "Audit-ready Move",
+    href: "https://github.com/EzraNahumury/tatum-walrus",
     external: true,
-    brand: "equinox-core",
+    brand: "proofpack-core",
   },
   {
-    title: "Manifesto on Walrus",
-    href: "https://docs.sui.io/",
+    title: "Bytes pinned to Walrus",
+    href: "https://docs.wal.app/",
     external: true,
     brand: "walrus",
   },
@@ -148,10 +148,10 @@ export function SecurityIntegrations() {
               className="text-sm leading-relaxed text-fg-muted sm:text-[15px]"
               style={{ fontFamily: "var(--font-tech), ui-sans-serif, system-ui" }}
             >
-              Your collateral never leaves the position contract, the agent&apos;s
-              behavior is pinned to an immutable manifesto on Walrus, and every
-              borrow, lend, and defense event is recorded onchain. A formal
-              third-party audit is scheduled ahead of mainnet launch on Sui.
+              Files live on Walrus as content-addressed blobs, the manifest
+              hash is anchored to a Sui Move object through Tatum&apos;s RPC
+              gateway, and every read/write — including the verifier&apos;s
+              hash recompute — is auditable by anyone with the objectId.
             </p>
           </div>
         </div>
@@ -246,8 +246,8 @@ export function SecurityIntegrations() {
   );
 }
 
-function BrandChip({ kind }: { kind: "equinox-core" | "walrus" }) {
-  if (kind === "equinox-core") {
+function BrandChip({ kind }: { kind: "proofpack-core" | "walrus" }) {
+  if (kind === "proofpack-core") {
     return (
       <div
         className="relative z-10 inline-flex items-center gap-2.5 rounded-full bg-white px-4 py-2 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_8px_22px_-12px_rgba(15,15,15,0.35)]"
@@ -265,7 +265,7 @@ function BrandChip({ kind }: { kind: "equinox-core" | "walrus" }) {
           </svg>
         </span>
         <span className="text-[14px] font-semibold tracking-tight text-[#0a0a0a]">
-          Equinox <span className="font-medium text-[#0a0a0a]/65">Core</span>
+          ProofPack <span className="font-medium text-[#0a0a0a]/65">Core</span>
         </span>
       </div>
     );

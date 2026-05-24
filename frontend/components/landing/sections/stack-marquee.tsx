@@ -24,13 +24,13 @@ type Item = {
 const ITEMS: Item[] = [
   { label: "Sui", icon: Hexagon },
   { label: "Move", icon: PenLine },
-  { label: "Suilend", icon: Boxes },
-  { label: "Scallop", icon: Fuel },
-  { label: "Cetus", icon: BrainCircuit },
   { label: "Walrus", icon: Database },
-  { label: "zkLogin", icon: Workflow },
+  { label: "Tatum RPC", icon: Boxes },
+  { label: "SHA-256", icon: Fuel },
+  { label: "Ollama", icon: BrainCircuit },
+  { label: "dApp Kit", icon: Workflow },
   { label: "Next.js 16", icon: Layers },
-  { label: "Pyth", icon: Wand2 },
+  { label: "MCP", icon: Wand2 },
   { label: "Mysten SDK", icon: Waves },
 ];
 

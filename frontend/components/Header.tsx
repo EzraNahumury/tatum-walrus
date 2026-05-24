@@ -2,37 +2,52 @@ import Image from "next/image";
 import Link from "next/link";
 import { WalletButton } from "./WalletButton";
 
+const NAV = [
+  { label: "Dashboard", href: "/dashboard" },
+  { label: "New Pack", href: "/pack/new" },
+  { label: "Verify", href: "/verify" },
+];
+
 export function Header() {
   return (
-    <header className="border-b border-[var(--border)]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-4 sm:gap-8 min-w-0">
+    <header className="sticky top-0 z-40 border-b border-border/60 bg-bg/70 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+        <div className="flex min-w-0 items-center gap-6 sm:gap-10">
           <Link
             href="/"
-            className="flex items-center gap-2 font-semibold tracking-tight whitespace-nowrap"
+            className="flex items-center gap-2.5 whitespace-nowrap text-[15px] font-semibold tracking-tight"
+            style={{ fontFamily: "var(--font-tech), ui-sans-serif, system-ui" }}
           >
             <Image
               src="/logo-v2.png"
-              alt="ProofPack AI logo"
+              alt="ProofPack AI"
               width={28}
               height={28}
               priority
-              className="rounded"
+              className="drop-shadow-[0_0_10px_rgba(145,129,245,0.45)]"
             />
-            <span><span className="text-[var(--accent)]">Proof</span>Pack AI</span>
+            <span>ProofPack AI</span>
           </Link>
-          <nav className="hidden sm:flex items-center gap-5 text-sm text-[var(--muted)]">
-            <Link href="/dashboard" className="hover:text-[var(--foreground)]">Dashboard</Link>
-            <Link href="/pack/new" className="hover:text-[var(--foreground)]">New Pack</Link>
-            <Link href="/verify" className="hover:text-[var(--foreground)]">Verify</Link>
+          <nav className="hidden items-center gap-1 text-sm sm:flex">
+            {NAV.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="rounded-full px-3 py-1.5 text-fg-muted transition-colors hover:bg-white/[0.04] hover:text-fg"
+              >
+                {l.label}
+              </Link>
+            ))}
           </nav>
         </div>
         <WalletButton />
       </div>
-      <nav className="sm:hidden flex items-center justify-around border-t border-[var(--border)] py-2 text-xs text-[var(--muted)]">
-        <Link href="/dashboard" className="hover:text-[var(--foreground)]">Dashboard</Link>
-        <Link href="/pack/new" className="hover:text-[var(--foreground)]">New</Link>
-        <Link href="/verify" className="hover:text-[var(--foreground)]">Verify</Link>
+      <nav className="flex items-center justify-around border-t border-border/60 py-2 text-[11px] uppercase tracking-[0.15em] text-fg-dim sm:hidden">
+        {NAV.map((l) => (
+          <Link key={l.href} href={l.href} className="hover:text-fg">
+            {l.label}
+          </Link>
+        ))}
       </nav>
     </header>
   );

@@ -23,23 +23,44 @@ export async function walrusUpload(
 
 async function walrusPublisherUpload(
   bytes: Uint8Array,
+  tries = 3,
 ): Promise<{ blobId: string; mode: string }> {
   const url = `${env.walrusPublisherUrl.replace(/\/$/, "")}/v1/blobs?epochs=${env.walrusDefaultEpochs}`;
-  const res = await fetch(url, {
-    method: "PUT",
-    body: new Uint8Array(bytes),
-    headers: { "content-type": "application/octet-stream" },
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Walrus publisher upload failed: ${res.status} ${text}`);
+  let lastErr: unknown;
+  for (let i = 0; i < tries; i++) {
+    try {
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), 45_000);
+      const res = await fetch(url, {
+        method: "PUT",
+        body: new Uint8Array(bytes),
+        headers: { "content-type": "application/octet-stream" },
+        signal: controller.signal,
+      });
+      clearTimeout(t);
+
+      if (res.status >= 500 || res.status === 429) {
+        lastErr = new Error(`Walrus publisher ${res.status}`);
+      } else if (!res.ok) {
+        // 4xx (non-429) = permanent, no retry
+        const text = await res.text();
+        throw new Error(`Walrus publisher upload failed: ${res.status} ${text}`);
+      } else {
+        const data = (await res.json()) as {
+          newlyCreated?: { blobObject: { blobId: string } };
+          alreadyCertified?: { blobId: string };
+        };
+        const blobId =
+          data.newlyCreated?.blobObject.blobId ?? data.alreadyCertified?.blobId;
+        if (!blobId) throw new Error("Walrus publisher response missing blobId");
+        return { blobId, mode: "walrus_publisher" };
+      }
+    } catch (e) {
+      lastErr = e;
+    }
+    if (i < tries - 1) {
+      await new Promise((r) => setTimeout(r, 800 * (i + 1)));
+    }
   }
-  const data = (await res.json()) as {
-    newlyCreated?: { blobObject: { blobId: string } };
-    alreadyCertified?: { blobId: string };
-  };
-  const blobId =
-    data.newlyCreated?.blobObject.blobId ?? data.alreadyCertified?.blobId;
-  if (!blobId) throw new Error("Walrus publisher response missing blobId");
-  return { blobId, mode: "walrus_publisher" };
+  throw lastErr ?? new Error("Walrus publisher upload failed");
 }

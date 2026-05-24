@@ -62,11 +62,21 @@ export default function NewPackPage() {
       for (const f of files) await sha256OfFile(f);
 
       setPhase("uploading-files");
-      const form = new FormData();
-      for (const f of files) form.append("files", f, f.name);
-      const upRes = await fetch("/api/upload", { method: "POST", body: form });
-      if (!upRes.ok) throw new Error(`upload: ${await upRes.text()}`);
-      const upJson = (await upRes.json()) as { files: UploadResult[] };
+      // Upload one file per request — partial progress survives single-file
+      // failures and dev hot-reload never kills a single multi-file fetch.
+      const uploaded: UploadResult[] = [];
+      for (const f of files) {
+        const form = new FormData();
+        form.append("files", f, f.name);
+        const upRes = await fetch("/api/upload", { method: "POST", body: form });
+        if (!upRes.ok) {
+          const t = await upRes.text();
+          throw new Error(`upload ${f.name} (${upRes.status}): ${t.slice(0, 200)}`);
+        }
+        const json = (await upRes.json()) as { files: UploadResult[] };
+        uploaded.push(...json.files);
+      }
+      const upJson = { files: uploaded };
 
       const manifest = buildManifest({
         title: title.trim(),

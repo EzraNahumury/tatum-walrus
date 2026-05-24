@@ -146,6 +146,171 @@ fun test_update_version_links_previous() {
 }
 
 #[test]
+fun test_set_visibility_owner_happy_path() {
+    let mut scenario = ts::begin(ALICE);
+    ts::next_tx(&mut scenario, ALICE);
+    {
+        proofpack::init_for_testing(ts::ctx(&mut scenario));
+    };
+    ts::next_tx(&mut scenario, ALICE);
+    {
+        let mut reg = ts::take_shared<Registry>(&scenario);
+        let clk = clock::create_for_testing(ts::ctx(&mut scenario));
+        proofpack::create(
+            &mut reg,
+            string::utf8(b"blob_v1"),
+            fake_hash(),
+            proofpack::vis_private(),
+            &clk,
+            ts::ctx(&mut scenario),
+        );
+        clock::destroy_for_testing(clk);
+        ts::return_shared(reg);
+    };
+    ts::next_tx(&mut scenario, ALICE);
+    {
+        let mut pack = ts::take_from_sender<ProofPack>(&scenario);
+        assert!(proofpack::visibility(&pack) == proofpack::vis_private(), 300);
+        proofpack::set_visibility(&mut pack, proofpack::vis_public(), ts::ctx(&mut scenario));
+        assert!(proofpack::visibility(&pack) == proofpack::vis_public(), 301);
+        ts::return_to_sender(&scenario, pack);
+    };
+    ts::end(scenario);
+}
+
+#[test]
+fun test_transfer_ownership_changes_owner() {
+    let mut scenario = ts::begin(ALICE);
+    ts::next_tx(&mut scenario, ALICE);
+    {
+        proofpack::init_for_testing(ts::ctx(&mut scenario));
+    };
+    ts::next_tx(&mut scenario, ALICE);
+    {
+        let mut reg = ts::take_shared<Registry>(&scenario);
+        let clk = clock::create_for_testing(ts::ctx(&mut scenario));
+        proofpack::create(
+            &mut reg,
+            string::utf8(b"blob_v1"),
+            fake_hash(),
+            proofpack::vis_unlisted(),
+            &clk,
+            ts::ctx(&mut scenario),
+        );
+        clock::destroy_for_testing(clk);
+        ts::return_shared(reg);
+    };
+    ts::next_tx(&mut scenario, ALICE);
+    {
+        let pack = ts::take_from_sender<ProofPack>(&scenario);
+        proofpack::transfer_ownership(pack, BOB, ts::ctx(&mut scenario));
+    };
+    ts::next_tx(&mut scenario, BOB);
+    {
+        let pack = ts::take_from_sender<ProofPack>(&scenario);
+        assert!(proofpack::owner(&pack) == BOB, 400);
+        ts::return_to_sender(&scenario, pack);
+    };
+    ts::end(scenario);
+}
+
+#[test]
+#[expected_failure(abort_code = sc::proofpack::ENotOwner)]
+fun test_transfer_ownership_rejects_non_owner() {
+    let mut scenario = ts::begin(ALICE);
+    ts::next_tx(&mut scenario, ALICE);
+    {
+        proofpack::init_for_testing(ts::ctx(&mut scenario));
+    };
+    ts::next_tx(&mut scenario, ALICE);
+    {
+        let mut reg = ts::take_shared<Registry>(&scenario);
+        let clk = clock::create_for_testing(ts::ctx(&mut scenario));
+        proofpack::create(
+            &mut reg,
+            string::utf8(b"blob_v1"),
+            fake_hash(),
+            proofpack::vis_private(),
+            &clk,
+            ts::ctx(&mut scenario),
+        );
+        clock::destroy_for_testing(clk);
+        ts::return_shared(reg);
+    };
+    ts::next_tx(&mut scenario, BOB);
+    {
+        let pack = ts::take_from_address<ProofPack>(&scenario, ALICE);
+        proofpack::transfer_ownership(pack, BOB, ts::ctx(&mut scenario));
+    };
+    ts::end(scenario);
+}
+
+#[test]
+#[expected_failure(abort_code = sc::proofpack::ENotOwner)]
+fun test_update_version_rejects_non_owner() {
+    let mut scenario = ts::begin(ALICE);
+    ts::next_tx(&mut scenario, ALICE);
+    {
+        proofpack::init_for_testing(ts::ctx(&mut scenario));
+    };
+    ts::next_tx(&mut scenario, ALICE);
+    {
+        let mut reg = ts::take_shared<Registry>(&scenario);
+        let clk = clock::create_for_testing(ts::ctx(&mut scenario));
+        proofpack::create(
+            &mut reg,
+            string::utf8(b"blob_v1"),
+            fake_hash(),
+            proofpack::vis_private(),
+            &clk,
+            ts::ctx(&mut scenario),
+        );
+        clock::destroy_for_testing(clk);
+        ts::return_shared(reg);
+    };
+    ts::next_tx(&mut scenario, BOB);
+    {
+        let pack = ts::take_from_address<ProofPack>(&scenario, ALICE);
+        let clk = clock::create_for_testing(ts::ctx(&mut scenario));
+        proofpack::update_version(
+            pack,
+            string::utf8(b"blob_v2_hack"),
+            other_hash(),
+            &clk,
+            ts::ctx(&mut scenario),
+        );
+        clock::destroy_for_testing(clk);
+    };
+    ts::end(scenario);
+}
+
+#[test]
+#[expected_failure(abort_code = sc::proofpack::EInvalidVisibility)]
+fun test_create_rejects_invalid_visibility() {
+    let mut scenario = ts::begin(ALICE);
+    ts::next_tx(&mut scenario, ALICE);
+    {
+        proofpack::init_for_testing(ts::ctx(&mut scenario));
+    };
+    ts::next_tx(&mut scenario, ALICE);
+    {
+        let mut reg = ts::take_shared<Registry>(&scenario);
+        let clk = clock::create_for_testing(ts::ctx(&mut scenario));
+        proofpack::create(
+            &mut reg,
+            string::utf8(b"blob_bad_vis"),
+            fake_hash(),
+            99, // invalid visibility
+            &clk,
+            ts::ctx(&mut scenario),
+        );
+        clock::destroy_for_testing(clk);
+        ts::return_shared(reg);
+    };
+    ts::end(scenario);
+}
+
+#[test]
 #[expected_failure(abort_code = sc::proofpack::ENotOwner)]
 fun test_set_visibility_rejects_non_owner() {
     let mut scenario = ts::begin(ALICE);

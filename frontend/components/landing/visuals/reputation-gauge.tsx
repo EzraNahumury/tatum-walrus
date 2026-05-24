@@ -148,7 +148,7 @@ export function ReputationGauge() {
   }, []);
 
   const status =
-    hf >= 1.5 ? "SAFE" : hf >= 1.3 ? "CAUTION" : hf >= 1.0 ? "DEFENSE" : "INIT";
+    hf >= 1.5 ? "ANCHOR" : hf >= 1.0 ? "MATCH" : hf >= 0.5 ? "HASH" : "FETCH";
 
   return (
     <div ref={wrapRef} className="absolute inset-0" aria-hidden>
@@ -169,7 +169,7 @@ export function ReputationGauge() {
               fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
             }}
           >
-            HF · {status}
+            VERIFY · {status}
           </span>
         </div>
       </div>

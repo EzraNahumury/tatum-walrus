@@ -5,15 +5,16 @@ import { ArrowUp } from "lucide-react";
 
 const navLeft = [
   { label: "HOME", href: "#top" },
-  { label: "GITHUB", href: "https://github.com/EzraNahumury" },
+  { label: "GITHUB", href: "https://github.com/EzraNahumury/tatum-walrus" },
   { label: "DASHBOARD", href: "/dashboard" },
-  { label: "MANIFESTO", href: "/manifesto" },
-  { label: "ONBOARDING", href: "/onboarding" },
+  { label: "NEW PACK", href: "/pack/new" },
+  { label: "VERIFY", href: "/verify" },
 ];
 
 const navRight = [
   { label: "SUI DOCS", href: "https://docs.sui.io/" },
-  { label: "SUILEND", href: "https://suilend.fi/" },
+  { label: "WALRUS DOCS", href: "https://docs.wal.app/" },
+  { label: "TATUM", href: "https://tatum.io/chain/sui" },
 ];
 
 function backToTop() {
@@ -42,7 +43,7 @@ export function Footer() {
                     "var(--font-tech), ui-sans-serif, system-ui",
                 }}
               >
-                EQUINOX AGENT
+                PROOFPACK AI
               </span>
             </div>
           </div>
@@ -129,7 +130,7 @@ export function Footer() {
               lineHeight: 0.85,
             }}
           >
-            EQUINOX AGENT
+            PROOFPACK AI
           </span>
         </div>
 
@@ -141,7 +142,7 @@ export function Footer() {
                 "var(--font-tech), ui-sans-serif, system-ui",
             }}
           >
-            © 2026 Equinox Agent. Self-repaying loans on Sui.
+            © 2026 ProofPack AI. Verifiable AI data room on Sui + Walrus + Tatum.
           </p>
           <p
             style={{
@@ -149,7 +150,7 @@ export function Footer() {
                 "var(--font-tech), ui-sans-serif, system-ui",
             }}
           >
-            zkLogin · Suilend · Scallop · Cetus · Walrus manifesto.
+            Sui dApp Kit · Move · Walrus · Tatum RPC · MCP-ready.
           </p>
         </div>
       </div>

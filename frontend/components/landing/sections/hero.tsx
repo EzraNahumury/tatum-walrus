@@ -5,9 +5,16 @@ import { ArrowUpRight, Plus } from "lucide-react";
 import { useGSAP } from "@gsap/react";
 import { gsap, registerGsap } from "@/lib/gsap";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { hero } from "@/lib/content";
 import { cn } from "@/lib/cn";
-import { CoinLottie } from "../ui/coin-lottie";
+
+// Defer lottie-react (~100 KB) until the hero is on screen. SSR off so the
+// JSON fetch + player only run client-side after hydration.
+const CoinLottie = dynamic(
+  () => import("../ui/coin-lottie").then((m) => ({ default: m.CoinLottie })),
+  { ssr: false },
+);
 
 export function Hero() {
   const ref = useRef<HTMLDivElement>(null);

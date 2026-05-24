@@ -41,3 +41,6 @@ npm-debug.log*
 
 # Reference landing page material — kept locally, not for commit
 contoh-lp/
+
+# Local testing fixture packs (kept out of repo to avoid noise; safe to delete)
+testing/

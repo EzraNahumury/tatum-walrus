@@ -123,7 +123,7 @@ export function DepositChart() {
           fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
         }}
       >
-        Debt repaid
+        Packs anchored
       </div>
       <div
         className="pointer-events-none absolute bottom-3 left-5 text-[10px] uppercase tracking-[0.18em] text-fg-dim"
@@ -131,7 +131,7 @@ export function DepositChart() {
           fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
         }}
       >
-        SPREAD CAPTURE
+        WALRUS BLOBS WRITTEN
       </div>
     </div>
   );

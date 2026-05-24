@@ -12,7 +12,7 @@ export function Header() {
             className="flex items-center gap-2 font-semibold tracking-tight whitespace-nowrap"
           >
             <Image
-              src="/logo.png"
+              src="/logo-v2.png"
               alt="ProofPack AI logo"
               width={28}
               height={28}

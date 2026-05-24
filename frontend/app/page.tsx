@@ -6,12 +6,11 @@ export default function Home() {
     <div className="space-y-16">
       <section className="space-y-6 max-w-3xl">
         <Image
-          src="/logo.png"
+          src="/logo-v2.png"
           alt="ProofPack AI logo"
-          width={96}
-          height={96}
+          width={120}
+          height={120}
           priority
-          className="rounded-xl"
         />
         <span className="inline-block text-xs uppercase tracking-[0.3em] text-[var(--accent)]">
           Sui · Walrus · Tatum

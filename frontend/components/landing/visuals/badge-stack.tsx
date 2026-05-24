@@ -45,7 +45,7 @@ export function BadgeStack() {
       }
     }
 
-    const tierLabels = ["SUILEND", "SCALLOP", "CETUS"];
+    const tierLabels = ["SUI", "WALRUS", "TATUM"];
 
     function sizeUp() {
       const r = wrap!.getBoundingClientRect();

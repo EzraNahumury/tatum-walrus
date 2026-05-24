@@ -38,3 +38,6 @@ npm-debug.log*
 # tsx / temp
 .turbo/
 .cache/
+
+# Reference landing page material — kept locally, not for commit
+contoh-lp/

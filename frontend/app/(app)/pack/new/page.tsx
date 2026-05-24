@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowUpRight, FileText, Hash, Sparkles, Tag } from "lucide-react";
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
 } from "@mysten/dapp-kit";
 import { FileDropzone } from "@/components/FileDropzone";
-import { Spinner } from "@/components/Spinner";
+import { LoadingLogo } from "@/components/LoadingLogo";
 import { ErrorPanel } from "@/components/ErrorPanel";
+import { Reveal } from "@/components/motion/Reveal";
 import { sha256OfFile } from "@/lib/hash/sha256";
 import { buildManifest, hashManifest } from "@/lib/manifest";
 import { buildCreateProofPackTx, visibilityToU8 } from "@/lib/sui/tx";
@@ -22,6 +24,16 @@ type Phase =
   | "signing"
   | "done"
   | "error";
+
+const PHASE_LABEL: Record<Phase, string> = {
+  idle: "",
+  hashing: "Hashing files…",
+  "uploading-files": "Uploading to Walrus…",
+  "uploading-manifest": "Anchoring manifest…",
+  signing: "Awaiting wallet signature…",
+  done: "Done",
+  error: "",
+};
 
 export default function NewPackPage() {
   const router = useRouter();
@@ -46,10 +58,7 @@ export default function NewPackPage() {
       setPhase("hashing");
       const owner = account.address as Hex;
 
-      // pre-hash for UX; server re-hashes authoritatively
-      for (const f of files) {
-        await sha256OfFile(f);
-      }
+      for (const f of files) await sha256OfFile(f);
 
       setPhase("uploading-files");
       const form = new FormData();
@@ -78,7 +87,6 @@ export default function NewPackPage() {
       if (!manRes.ok) throw new Error(`manifest: ${await manRes.text()}`);
       const manJson = (await manRes.json()) as { manifestBlobId: string; manifestHash: string };
 
-      // sanity check
       const { hash } = await hashManifest(manifest);
       if (hash !== manJson.manifestHash) {
         throw new Error(`manifest hash mismatch (client ${hash} vs server ${manJson.manifestHash})`);
@@ -94,7 +102,6 @@ export default function NewPackPage() {
       const result = await signAndExecute({ transaction: tx });
       setPhase("done");
 
-      // find the created ProofPack object id from effects
       const txRes = await fetch(`/api/proofpack/lookup?digest=${result.digest}`)
         .then((r) => (r.ok ? r.json() : null))
         .catch(() => null);
@@ -109,84 +116,156 @@ export default function NewPackPage() {
   }
 
   return (
-    <div className="max-w-2xl space-y-8">
-      <h1 className="text-3xl font-semibold">Create ProofPack</h1>
+    <div className="mx-auto max-w-3xl space-y-10">
+      <Reveal>
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.22em] text-fg-dim">Step 1 of 1</p>
+          <h1
+            className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl"
+            style={{ fontFamily: "var(--font-tech), ui-sans-serif, system-ui" }}
+          >
+            Create a ProofPack
+          </h1>
+          <p className="mt-2 max-w-xl text-sm text-fg-muted">
+            Drop files, sign once. Bytes land on Walrus, the manifest hash anchors on Sui via Tatum.
+          </p>
+        </div>
+      </Reveal>
 
       {!account && (
-        <p className="text-sm text-[var(--muted)]">Connect a Sui wallet to continue.</p>
+        <Reveal>
+          <div className="rounded-2xl border border-amber-300/20 bg-[rgba(255,196,107,0.06)] px-4 py-3 text-sm text-[var(--color-amber)]">
+            Connect a Sui wallet to continue.
+          </div>
+        </Reveal>
       )}
 
-      <div className="space-y-4">
-        <Field label="Title">
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Startup Due Diligence Pack"
-            className="w-full bg-transparent border border-[var(--border)] rounded-md px-3 py-2 outline-none focus:border-[var(--accent)]"
-          />
-        </Field>
-        <Field label="Description">
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            className="w-full bg-transparent border border-[var(--border)] rounded-md px-3 py-2 outline-none focus:border-[var(--accent)]"
-          />
-        </Field>
-        <Field label="Tags (comma separated)">
-          <input
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="grant, q4-2026, evidence"
-            className="w-full bg-transparent border border-[var(--border)] rounded-md px-3 py-2 outline-none focus:border-[var(--accent)]"
-          />
-        </Field>
-        <Field label="Visibility">
-          <select
-            value={visibility}
-            onChange={(e) => setVisibility(e.target.value as Visibility)}
-            className="w-full bg-transparent border border-[var(--border)] rounded-md px-3 py-2"
-          >
-            <option value="public">Public</option>
-            <option value="unlisted">Unlisted</option>
-            <option value="private">Private</option>
-          </select>
-        </Field>
-      </div>
+      <Reveal delay={0.05}>
+        <section className="space-y-5 rounded-2xl border border-border bg-surface/60 p-6">
+          <Field label="Title" icon={<Sparkles className="size-3.5" />}>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Startup Due Diligence Pack"
+              className="w-full rounded-xl border border-border bg-bg/40 px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-fg-dim focus:border-[var(--color-violet-soft)]"
+            />
+          </Field>
+          <Field label="Description">
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full rounded-xl border border-border bg-bg/40 px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-fg-dim focus:border-[var(--color-violet-soft)]"
+              placeholder="What's inside this pack? Optional."
+            />
+          </Field>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field label="Tags (comma separated)" icon={<Tag className="size-3.5" />}>
+              <input
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                placeholder="grant, q4-2026, evidence"
+                className="w-full rounded-xl border border-border bg-bg/40 px-3.5 py-2.5 text-sm outline-none transition-colors placeholder:text-fg-dim focus:border-[var(--color-violet-soft)]"
+              />
+            </Field>
+            <Field label="Visibility">
+              <div className="flex flex-wrap gap-2">
+                {(["public", "unlisted", "private"] as Visibility[]).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setVisibility(v)}
+                    className={`rounded-full border px-3.5 py-2 text-xs uppercase tracking-wider transition-all ${
+                      visibility === v
+                        ? "border-[var(--color-violet-soft)] bg-[rgba(145,129,245,0.14)] text-fg"
+                        : "border-border bg-bg/40 text-fg-muted hover:text-fg"
+                    }`}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            </Field>
+          </div>
+        </section>
+      </Reveal>
 
-      <div className="space-y-2">
-        <h2 className="font-semibold">Files</h2>
-        <FileDropzone files={files} onChange={setFiles} disabled={phase !== "idle" && phase !== "error"} />
-      </div>
+      <Reveal delay={0.1}>
+        <section className="space-y-3 rounded-2xl border border-border bg-surface/60 p-6">
+          <div className="flex items-center gap-2 text-xs text-fg-muted">
+            <FileText className="size-3.5" />
+            <span className="uppercase tracking-[0.18em]">Files</span>
+          </div>
+          <FileDropzone
+            files={files}
+            onChange={setFiles}
+            disabled={phase !== "idle" && phase !== "error"}
+          />
+        </section>
+      </Reveal>
 
-      <div className="flex items-center gap-4">
-        <button
-          disabled={!canSubmit}
-          onClick={submit}
-          className="px-5 py-3 rounded-md bg-[var(--accent)] text-[#0b0d12] font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {phase === "idle" || phase === "error" ? "Create ProofPack" : "Working…"}
-        </button>
-        {phase === "hashing" && <Spinner label="Hashing files…" />}
-        {phase === "uploading-files" && <Spinner label="Uploading to Walrus…" />}
-        {phase === "uploading-manifest" && <Spinner label="Anchoring manifest…" />}
-        {phase === "signing" && <Spinner label="Awaiting wallet signature…" />}
-      </div>
       {err && (
         <ErrorPanel
           title="Pack creation failed"
           message={err}
-          action={{ label: "Reset and try again", onClick: () => { setErr(null); setPhase("idle"); } }}
+          action={{
+            label: "Reset and try again",
+            onClick: () => {
+              setErr(null);
+              setPhase("idle");
+            },
+          }}
         />
       )}
+
+      <Reveal delay={0.15}>
+        <div className="sticky bottom-4 flex flex-wrap items-center gap-4 rounded-2xl border border-border-strong bg-surface/85 px-5 py-4 backdrop-blur-xl">
+          <div className="flex flex-1 items-center gap-3">
+            <Hash className="size-4 text-fg-muted" />
+            <div className="text-xs text-fg-muted">
+              {files.length === 0 ? (
+                "Add files to continue"
+              ) : (
+                <>
+                  <span className="font-semibold text-fg tabular">{files.length}</span> file
+                  {files.length === 1 ? "" : "s"} ready · all bytes will be SHA-256&apos;d before upload
+                </>
+              )}
+            </div>
+          </div>
+          {phase !== "idle" && phase !== "error" && phase !== "done" && (
+            <LoadingLogo label={PHASE_LABEL[phase]} />
+          )}
+          <button
+            disabled={!canSubmit}
+            onClick={submit}
+            className="group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-[0_-4px_8px_rgba(255,255,255,0.25)_inset] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
+            style={{ background: "var(--gradient-brand)" }}
+          >
+            {phase === "idle" || phase === "error" ? "Create ProofPack" : "Working…"}
+            <ArrowUpRight className="size-3.5 transition-transform group-hover:-translate-y-[1px]" />
+          </button>
+        </div>
+      </Reveal>
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  icon,
+  children,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block space-y-1.5">
-      <span className="text-sm text-[var(--muted)]">{label}</span>
+      <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-fg-dim">
+        {icon}
+        {label}
+      </span>
       {children}
     </label>
   );

@@ -5,7 +5,6 @@ import {
   ConnectButton,
   useCurrentAccount,
   useDisconnectWallet,
-  useSuiClientQuery,
 } from "@mysten/dapp-kit";
 import { Check, Copy, ExternalLink, LogOut, X } from "lucide-react";
 
@@ -28,11 +27,27 @@ export function WalletPanel() {
   const panelRef = useRef<HTMLDivElement>(null);
   const network = process.env.NEXT_PUBLIC_SUI_NETWORK ?? "testnet";
 
-  const { data: balance } = useSuiClientQuery(
-    "getBalance",
-    { owner: account?.address ?? "" },
-    { enabled: !!account?.address, refetchInterval: 15_000 },
-  );
+  const [balance, setBalance] = useState<string | null>(null);
+  useEffect(() => {
+    if (!account?.address) return;
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch(`/api/balance?owner=${account!.address}`);
+        if (!res.ok) return;
+        const d = (await res.json()) as { totalBalance?: string };
+        if (!cancelled && d.totalBalance !== undefined) setBalance(d.totalBalance);
+      } catch {
+        // ignore
+      }
+    }
+    load();
+    const t = setInterval(load, 15_000);
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+    };
+  }, [account?.address]);
 
   useEffect(() => {
     if (!open) return;
@@ -56,7 +71,7 @@ export function WalletPanel() {
     return <ConnectButton connectText="Connect wallet" />;
   }
 
-  const suiBalance = balance ? Number(balance.totalBalance) / 1e9 : 0;
+  const suiBalance = balance ? Number(balance) / 1e9 : 0;
   const explorer = `https://suiscan.xyz/${network}/account/${account.address}`;
 
   async function copyAddr() {
@@ -113,7 +128,7 @@ export function WalletPanel() {
               {short(account.address)}
             </p>
             <p className="text-xs text-fg-dim tabular">
-              {balance ? `${suiBalance.toFixed(4)} SUI` : "— SUI"}
+              {balance !== null ? `${suiBalance.toFixed(4)} SUI` : "loading…"}
             </p>
           </div>
 

@@ -177,6 +177,15 @@ export function FAQ() {
                   return (
                     <div
                       key={item.q}
+                      // When this item opens, bring it to the top of the
+                      // scrollable list so later items (6, 7) stay visible.
+                      ref={(el) => {
+                        if (isOpen && el) {
+                          requestAnimationFrame(() => {
+                            el.scrollIntoView({ block: "start", behavior: "smooth" });
+                          });
+                        }
+                      }}
                       className={`faq-item transition-colors ${
                         isOpen
                           ? "rounded-[28px] bg-[#0a0a0a]/[0.05]"
@@ -214,7 +223,7 @@ export function FAQ() {
                       </button>
                       {isOpen && (
                         <div
-                          className="px-7 pb-3.5 pt-0.5 text-[13.5px] font-normal leading-relaxed text-[#0a0a0a]/70 sm:px-9 sm:pb-4 lg:text-[14.5px]"
+                          className="px-6 pb-3 pt-0.5 text-[13px] font-normal leading-snug text-[#0a0a0a]/70 sm:px-8 sm:pb-3.5 sm:text-[13.5px] lg:text-[14px]"
                           style={{
                             fontFamily:
                               "var(--font-tech), ui-sans-serif, system-ui",

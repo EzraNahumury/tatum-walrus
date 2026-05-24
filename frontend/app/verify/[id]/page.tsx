@@ -86,15 +86,15 @@ export default async function VerifyDetail({
         <h2 className="font-semibold mb-3">Files</h2>
         <ul className="border border-[var(--border)] rounded-lg divide-y divide-[var(--border)] text-sm">
           {report.files.map((f, i) => (
-            <li key={i} className="p-3 grid grid-cols-12 gap-2 items-center">
-              <span className="col-span-4 truncate">{f.filename}</span>
-              <span className="col-span-3 font-mono text-xs text-[var(--muted)] truncate" title={f.expected}>
+            <li key={i} className="p-3 grid grid-cols-1 md:grid-cols-12 gap-1.5 md:gap-2 md:items-center">
+              <span className="md:col-span-4 truncate">{f.filename}</span>
+              <span className="md:col-span-3 font-mono text-xs text-[var(--muted)] truncate" title={f.expected}>
                 exp {f.expected.slice(0, 12)}…
               </span>
-              <span className="col-span-3 font-mono text-xs text-[var(--muted)] truncate" title={f.actual}>
+              <span className="md:col-span-3 font-mono text-xs text-[var(--muted)] truncate" title={f.actual}>
                 got {String(f.actual).slice(0, 12)}…
               </span>
-              <span className={`col-span-2 text-right font-semibold ${f.ok ? "text-[var(--accent)]" : "text-[var(--danger)]"}`}>
+              <span className={`md:col-span-2 md:text-right font-semibold text-xs md:text-sm ${f.ok ? "text-[var(--accent)]" : "text-[var(--danger)]"}`}>
                 {f.ok ? "OK" : "FAIL"}
               </span>
             </li>

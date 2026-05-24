@@ -86,14 +86,14 @@ export default async function PackDetailPage({
           <h2 className="font-semibold mb-3">Files</h2>
           <ul className="border border-[var(--border)] rounded-lg divide-y divide-[var(--border)] text-sm">
             {manifest.files.map((f, i) => (
-              <li key={i} className="p-3 grid grid-cols-12 gap-3 items-center">
-                <span className="col-span-4 truncate font-medium">{f.filename}</span>
-                <span className="col-span-2 text-[var(--muted)]">{(f.size / 1024).toFixed(1)} KB</span>
-                <span className="col-span-3 text-[var(--muted)] truncate" title={f.sha256}>
+              <li key={i} className="p-3 grid grid-cols-1 md:grid-cols-12 gap-1.5 md:gap-3 md:items-center">
+                <span className="md:col-span-4 truncate font-medium">{f.filename}</span>
+                <span className="md:col-span-2 text-[var(--muted)] text-xs md:text-sm">{(f.size / 1024).toFixed(1)} KB</span>
+                <span className="md:col-span-3 text-[var(--muted)] truncate text-xs md:text-sm" title={f.sha256}>
                   sha256: {f.sha256.slice(0, 16)}…
                 </span>
                 <a
-                  className="col-span-3 text-right text-[var(--accent)] hover:underline truncate"
+                  className="md:col-span-3 md:text-right text-[var(--accent)] hover:underline truncate text-xs md:text-sm"
                   href={`${AGGREGATOR.replace(/\/$/, "")}/v1/blobs/${f.blobId}`}
                   target="_blank"
                   rel="noreferrer"

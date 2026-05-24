@@ -7,7 +7,7 @@ export default function Home() {
         <span className="inline-block text-xs uppercase tracking-[0.3em] text-[var(--accent)]">
           Sui · Walrus · Tatum
         </span>
-        <h1 className="text-5xl font-semibold leading-tight">
+        <h1 className="text-3xl sm:text-5xl font-semibold leading-tight">
           Verifiable AI Data Room.
           <br />
           <span className="text-[var(--muted)]">Every answer comes with a proof.</span>

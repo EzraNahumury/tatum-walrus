@@ -177,15 +177,6 @@ export function FAQ() {
                   return (
                     <div
                       key={item.q}
-                      // When this item opens, bring it to the top of the
-                      // scrollable list so later items (6, 7) stay visible.
-                      ref={(el) => {
-                        if (isOpen && el) {
-                          requestAnimationFrame(() => {
-                            el.scrollIntoView({ block: "start", behavior: "smooth" });
-                          });
-                        }
-                      }}
                       className={`faq-item transition-colors ${
                         isOpen
                           ? "rounded-[28px] bg-[#0a0a0a]/[0.05]"

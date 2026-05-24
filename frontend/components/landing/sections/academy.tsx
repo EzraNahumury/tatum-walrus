@@ -18,28 +18,28 @@ import { gsap, ScrollTrigger, registerGsap } from "@/lib/gsap";
 
 const tabs = [
   { icon: BookOpen, label: "Getting Started", iconClass: "text-amber-600" },
-  { icon: Eye, label: "How spread works", iconClass: "text-[#0a0a0a]/55" },
-  { icon: Bot, label: "Agent & Manifesto", iconClass: "text-emerald-600" },
-  { icon: Lock, label: "Defense engine", iconClass: "text-amber-500" },
-  { icon: Cpu, label: "Risk profiles", iconClass: "text-[#0a0a0a]/55" },
+  { icon: Eye, label: "How verification works", iconClass: "text-[#0a0a0a]/55" },
+  { icon: Bot, label: "AI grounding rules", iconClass: "text-emerald-600" },
+  { icon: Lock, label: "Tatum RPC + MCP", iconClass: "text-amber-500" },
+  { icon: Cpu, label: "Visibility modes", iconClass: "text-[#0a0a0a]/55" },
   { icon: Plus, label: "And more", disabled: true },
 ];
 
 const articles = [
   {
-    title: "Equinox in 60 seconds",
+    title: "ProofPack in 60 seconds",
     body:
-      "Sign in with zkLogin, deposit SUI, pick Balanced (LTV 55%). The agent borrows USDC on Suilend, allocates to Scallop and Cetus, and the spread auto-repays your debt — every block.",
+      "Connect a Sui wallet, drag in files, pick visibility. Each file streams to Walrus; the canonical manifest hash is anchored on Sui via Tatum RPC. Share the public verifier link — anyone can re-check.",
   },
   {
-    title: "How spread capture works",
+    title: "How verification works",
     body:
-      "Borrow APR on Suilend is lower than lend APR on Scallop and Cetus. The agent locks the differential continuously and applies it to your active debt. No manual repayment ever.",
+      "The verifier refetches every blob from Walrus, recomputes SHA-256 in the browser, and compares against the on-chain manifest hash. Mismatch on any file = INVALID, with the exact byte diff.",
   },
   {
-    title: "Reading your Manifesto",
+    title: "Why the AI cannot hallucinate",
     body:
-      "Every position pins a manifesto to Walrus: LTV target, max LTV, defense thresholds, recycle ratio, buffer, allocation caps. The agent cannot deviate — verify any time from the dashboard.",
+      "The grounding filter drops any model citation whose blobId is not in the manifest. If nothing valid remains, the answer is replaced with \"Not found in this ProofPack\" — refusal, not invention.",
   },
 ];
 

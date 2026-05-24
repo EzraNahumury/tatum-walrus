@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Layers, Plus } from "lucide-react";
-import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
+import { useCurrentAccount } from "@mysten/dapp-kit";
 import { Reveal } from "@/components/motion/Reveal";
 import { ErrorPanel } from "@/components/ErrorPanel";
 import { SkeletonRow } from "@/components/Skeleton";
@@ -31,7 +31,6 @@ function visTone(n: number): string {
 
 export default function DashboardPage() {
   const account = useCurrentAccount();
-  const client = useSuiClient();
   const [rows, setRows] = useState<PackRow[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
@@ -42,20 +41,23 @@ export default function DashboardPage() {
     let cancelled = false;
     (async () => {
       try {
-        const owned = await client.getOwnedObjects({
-          owner: account.address,
-          filter: { StructType: `${pkgId}::proofpack::ProofPack` },
-          options: { showContent: true, showType: true },
-        });
+        const res = await fetch(`/api/owned?owner=${account.address}`);
+        if (!res.ok) {
+          const t = await res.text();
+          throw new Error(`/api/owned ${res.status}: ${t}`);
+        }
+        const json = (await res.json()) as {
+          data: Array<{ objectId: string; fields: Record<string, unknown> | null }>;
+        };
         const data: PackRow[] = [];
-        for (const item of owned.data) {
-          const f = (item.data?.content as { fields?: Record<string, unknown> } | undefined)?.fields;
+        for (const item of json.data) {
+          const f = item.fields;
           if (!f) continue;
           const pv = f.previous_version as { vec?: string[] } | undefined;
           const previousVersionId =
             pv && Array.isArray(pv.vec) && pv.vec.length > 0 ? (pv.vec[0] as Hex) : undefined;
           data.push({
-            objectId: item.data!.objectId as Hex,
+            objectId: item.objectId as Hex,
             version: Number(f.version),
             visibility: Number(f.visibility),
             manifestBlobId: String(f.manifest_blob_id),
@@ -71,7 +73,7 @@ export default function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [account, client, pkgId]);
+  }, [account, pkgId]);
 
   if (!account) {
     return (

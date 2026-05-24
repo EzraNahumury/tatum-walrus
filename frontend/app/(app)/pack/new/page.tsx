@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { ArrowUpRight, FileText, Hash, Sparkles, Tag } from "lucide-react";
 import {
   useCurrentAccount,
-  useSignAndExecuteTransaction,
+  useSignTransaction,
+  useSuiClient,
 } from "@mysten/dapp-kit";
 import { FileDropzone } from "@/components/FileDropzone";
 import { LoadingLogo } from "@/components/LoadingLogo";
@@ -16,6 +17,12 @@ import { sha256OfFile } from "@/lib/hash/sha256";
 import { buildManifest, hashManifest } from "@/lib/manifest";
 import { buildCreateProofPackTx, visibilityToU8 } from "@/lib/sui/tx";
 import type { Hex, UploadResult, Visibility } from "@/lib/types";
+
+function toBase64(bytes: Uint8Array): string {
+  let s = "";
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return btoa(s);
+}
 
 type Phase =
   | "idle"
@@ -39,7 +46,8 @@ const PHASE_LABEL: Record<Phase, string> = {
 export default function NewPackPage() {
   const router = useRouter();
   const account = useCurrentAccount();
-  const { mutateAsync: signAndExecute } = useSignAndExecuteTransaction();
+  const suiClient = useSuiClient();
+  const { mutateAsync: signTransaction } = useSignTransaction();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -110,15 +118,41 @@ export default function NewPackPage() {
         visibility: visibilityToU8(visibility),
       });
 
-      const result = await signAndExecute({ transaction: tx });
+      // Build full tx bytes locally (server is not in the trust path for
+      // signing). The wallet then signs only the bytes we built.
+      const txBytes = await tx.build({ client: suiClient });
+      const signed = await signTransaction({ transaction: tx });
+
+      // Execute through our server route — Tatum gateway blocks browser POSTs
+      // for sui_executeTransactionBlock with a CORS error, and going through
+      // /api/execute also attributes the call via x-api-key.
+      const execRes = await fetch("/api/execute", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          transactionBlock: signed.bytes ?? toBase64(txBytes),
+          signature: signed.signature,
+        }),
+      });
+      if (!execRes.ok) {
+        const t = await execRes.text();
+        throw new Error(`execute (${execRes.status}): ${t.slice(0, 200)}`);
+      }
+      const exec = (await execRes.json()) as {
+        digest: string;
+        objectChanges?: Array<{ type: string; objectType?: string; objectId?: string }>;
+      };
       setPhase("done");
 
-      const txRes = await fetch(`/api/proofpack/lookup?digest=${result.digest}`)
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null);
-      const packId = txRes?.objectId as string | undefined;
+      const created = (exec.objectChanges ?? []).find(
+        (c) =>
+          c.type === "created" &&
+          typeof c.objectType === "string" &&
+          c.objectType.includes("::proofpack::ProofPack"),
+      );
+      const packId = created?.objectId;
       if (packId) router.push(`/pack/${packId}`);
-      else router.push(`/dashboard?digest=${result.digest}`);
+      else router.push(`/dashboard?digest=${exec.digest}`);
     } catch (e) {
       console.error(e);
       setErr(String(e));

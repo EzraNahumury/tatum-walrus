@@ -8,115 +8,46 @@ import { faq } from "@/lib/content";
 
 export function FAQ() {
   const sectionRef = useRef<HTMLElement>(null);
-  const pinRef = useRef<HTMLDivElement>(null);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   useGSAP(
     () => {
       registerGsap();
-      if (!sectionRef.current || !pinRef.current) return;
+      if (!sectionRef.current) return;
 
-      const mm = gsap.matchMedia();
+      // Drop the pin animation. Letting the FAQ section grow naturally is the
+      // only way every item + opened answer stays visible without clipping at
+      // any viewport height.
+      gsap.set(".faq-window", { width: "100%", height: "auto", borderRadius: 0 });
+      gsap.set(".faq-mini", { display: "none" });
+      gsap.set(".faq-expanded", { opacity: 1, position: "static" });
 
-      mm.add("(min-width: 1024px)", () => {
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: pinRef.current!,
-            start: "top top",
-            end: "+=120%",
-            scrub: 0.6,
-            pin: true,
-            anticipatePin: 1,
-          },
-        });
-
-        // Card grows to fullscreen
-        tl.to(
-          ".faq-window",
-          {
-            width: "100vw",
-            height: "100vh",
-            borderRadius: 0,
-            ease: "power2.inOut",
-            duration: 0.6,
-          },
-          0
-        );
-
-        tl.to(
-          ".faq-mini",
-          { opacity: 0, scale: 0.85, ease: "power2.in", duration: 0.25 },
-          0
-        );
-
-        tl.fromTo(
-          ".faq-expanded",
-          { opacity: 0 },
-          { opacity: 1, duration: 0.2 },
-          0.4
-        );
-
-        tl.fromTo(
-          ".faq-headline-word",
-          { opacity: 0, y: 24 },
-          { opacity: 1, y: 0, stagger: 0.06, ease: "expo.out", duration: 0.3 },
-          0.5
-        );
-
-        tl.fromTo(
-          ".faq-item",
-          { opacity: 0, y: 18 },
-          { opacity: 1, y: 0, stagger: 0.05, ease: "expo.out", duration: 0.35 },
-          0.7
-        );
-
-        tl.fromTo(
-          ".faq-footer",
-          { opacity: 0, y: 12 },
-          { opacity: 1, y: 0, ease: "expo.out", duration: 0.25 },
-          0.95
-        );
-
-        return () => {
-          tl.scrollTrigger?.kill();
-          tl.kill();
-        };
-      });
-
-      // Mobile: no pin, just show content with simple fades
-      mm.add("(max-width: 1023px)", () => {
-        gsap.set(".faq-window", { width: "100%", height: "auto" });
-        gsap.set(".faq-mini", { display: "none" });
-        gsap.set(".faq-expanded", { opacity: 1, position: "static" });
-
-        gsap.fromTo(
-          ".faq-headline-word",
-          { opacity: 0, y: 18 },
-          {
-            opacity: 1,
-            y: 0,
-            stagger: 0.08,
-            duration: 0.7,
-            ease: "expo.out",
-            scrollTrigger: { trigger: sectionRef.current!, start: "top 75%" },
-          }
-        );
-        gsap.fromTo(
-          ".faq-item",
-          { opacity: 0, y: 18 },
-          {
-            opacity: 1,
-            y: 0,
-            stagger: 0.06,
-            duration: 0.6,
-            ease: "expo.out",
-            scrollTrigger: { trigger: ".faq-list", start: "top 85%" },
-          }
-        );
-      });
+      gsap.fromTo(
+        ".faq-headline-word",
+        { opacity: 0, y: 18 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.08,
+          duration: 0.7,
+          ease: "expo.out",
+          scrollTrigger: { trigger: sectionRef.current!, start: "top 75%" },
+        }
+      );
+      gsap.fromTo(
+        ".faq-item",
+        { opacity: 0, y: 18 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.06,
+          duration: 0.6,
+          ease: "expo.out",
+          scrollTrigger: { trigger: ".faq-list", start: "top 85%" },
+        }
+      );
 
       return () => {
-        mm.revert();
         ScrollTrigger.refresh();
       };
     },
@@ -124,14 +55,9 @@ export function FAQ() {
   );
 
   return (
-    <section id="faq" ref={sectionRef} className="relative bg-bg">
-      <div
-        ref={pinRef}
-        className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-bg lg:flex"
-      >
-        <div className="absolute inset-0 bg-bg" aria-hidden />
-
-        <div className="faq-window relative z-10 flex h-[360px] w-[330px] flex-col overflow-hidden rounded-[2rem] bg-white shadow-[0_30px_100px_-20px_rgba(0,0,0,0.6)]">
+    <section id="faq" ref={sectionRef} className="relative bg-bg py-16 sm:py-24">
+      <div className="relative flex w-full items-stretch justify-center bg-bg">
+        <div className="faq-window relative z-10 flex w-full flex-col bg-white shadow-[0_30px_100px_-20px_rgba(0,0,0,0.6)]">
           {/* Mini state */}
           <div className="faq-mini absolute inset-0 p-8">
             <h3
@@ -151,9 +77,9 @@ export function FAQ() {
             </div>
           </div>
 
-          {/* Expanded state */}
-          <div className="faq-expanded absolute inset-0 flex flex-col opacity-0">
-            <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col overflow-hidden px-7 pt-10 pb-4 sm:px-12 sm:pt-14 lg:px-20 lg:pt-16 lg:pb-5">
+          {/* Expanded state — natural flow so all items stay reachable */}
+          <div className="faq-expanded flex flex-col opacity-0">
+            <div className="mx-auto flex w-full max-w-[1400px] flex-col px-7 pt-10 pb-8 sm:px-12 sm:pt-14 sm:pb-12 lg:px-20 lg:pt-16 lg:pb-16">
               <h2
                 className="shrink-0 text-center text-[clamp(2rem,4.2vw,4.25rem)] font-normal leading-[1.05] tracking-[-0.015em] text-[#0a0a0a]"
                 style={{
@@ -170,22 +96,13 @@ export function FAQ() {
                 </span>
               </h2>
 
-              {/* List scrolls inside the pinned card so tall content never clips */}
-              <div className="faq-list mx-auto mt-6 w-full max-w-[820px] flex-1 space-y-1.5 overflow-y-auto pr-1 [scrollbar-width:thin] sm:mt-8 sm:space-y-2 lg:mt-8">
+              {/* Natural flow — no inner scroll, page scrolls past */}
+              <div className="faq-list mx-auto mt-6 w-full max-w-[820px] space-y-1.5 sm:mt-8 sm:space-y-2 lg:mt-8">
                 {faq.items.map((item, i) => {
                   const isOpen = openIdx === i;
                   return (
                     <div
                       key={item.q}
-                      // When this item opens, bring it to the top of the
-                      // scrollable list so later items (6, 7) stay visible.
-                      ref={(el) => {
-                        if (isOpen && el) {
-                          requestAnimationFrame(() => {
-                            el.scrollIntoView({ block: "start", behavior: "smooth" });
-                          });
-                        }
-                      }}
                       className={`faq-item transition-colors ${
                         isOpen
                           ? "rounded-[28px] bg-[#0a0a0a]/[0.05]"

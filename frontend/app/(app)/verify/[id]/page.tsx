@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { VerifyBadge } from "@/components/VerifyBadge";
+import { CheckCircle2, ExternalLink, Hash, Shield, XCircle } from "lucide-react";
 import type {
   ProofPackManifest,
   ProofPackOnChain,
@@ -37,9 +37,16 @@ export default async function VerifyDetail({
 
   if (!res.ok || data.error) {
     return (
-      <div>
-        <h1 className="text-2xl font-semibold mb-2">Verification</h1>
-        <p className="text-[var(--danger)] text-sm">{data.message ?? data.error}</p>
+      <div className="mx-auto max-w-2xl">
+        <h1
+          className="text-2xl font-semibold tracking-tight"
+          style={{ fontFamily: "var(--font-tech), ui-sans-serif, system-ui" }}
+        >
+          Verification
+        </h1>
+        <p className="mt-3 rounded-2xl border border-[var(--color-danger)]/30 bg-[rgba(255,107,107,0.06)] px-4 py-3 text-sm text-[var(--color-danger)]">
+          {data.message ?? data.error}
+        </p>
       </div>
     );
   }
@@ -47,88 +54,193 @@ export default async function VerifyDetail({
   const { onChain, manifest, report } = data;
   const net = process.env.NEXT_PUBLIC_SUI_NETWORK ?? "testnet";
   const explorer = `https://suiscan.xyz/${net}/object/${onChain.objectId}`;
+  const valid = report.valid;
+  const okCount = report.files.filter((f) => f.ok).length;
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-start justify-between gap-6">
+    <div className="space-y-10">
+      <header className="grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-center">
         <div>
-          <p className="text-xs text-[var(--muted)] uppercase tracking-widest">Public verifier</p>
-          <h1 className="text-3xl font-semibold mt-1">{manifest.title}</h1>
-          <p className="text-sm text-[var(--muted)] mt-2 max-w-2xl">
-            Bytes refetched from Walrus, hashes recomputed in this browser session, and compared against the on-chain anchor on Sui via Tatum RPC.
+          <p className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.22em] text-fg-dim">
+            <Shield className="size-3" /> Public verifier
+          </p>
+          <h1
+            className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl"
+            style={{ fontFamily: "var(--font-tech), ui-sans-serif, system-ui" }}
+          >
+            {manifest.title}
+          </h1>
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-fg-muted sm:text-[15px]">
+            Bytes refetched from Walrus, hashes recomputed in this browser session, and compared
+            against the on-chain anchor on Sui via Tatum RPC.
           </p>
         </div>
-        <VerifyBadge valid={report.valid} />
-      </div>
 
-      <div className="grid md:grid-cols-2 gap-6 text-sm">
-        <Box title="On-chain anchor">
-          <Row k="objectId" v={onChain.objectId} link={explorer} />
-          <Row k="owner" v={onChain.owner} />
-          <Row k="manifestHash" v={onChain.manifestHash} />
+        <BigStatus valid={valid} okCount={okCount} total={report.files.length} manifestOk={report.manifestOk} />
+      </header>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Box title="On-chain anchor" icon={<Hash className="size-3.5" />}>
+          <Row k="objectId" v={onChain.objectId} link={explorer} mono />
+          <Row k="owner" v={onChain.owner} mono />
+          <Row k="manifestHash" v={onChain.manifestHash} mono />
           <Row k="network" v={report.network} />
-          <Row k="rpc" v={report.tatumRpcUrl} />
+          <Row k="rpc" v={report.tatumRpcUrl} mono />
         </Box>
-        <Box title="Manifest check">
-          <Row k="manifestBlobId" v={onChain.manifestBlobId} link={`${AGGREGATOR.replace(/\/$/, "")}/v1/blobs/${onChain.manifestBlobId}`} />
+        <Box title="Manifest check" icon={<CheckCircle2 className="size-3.5" />}>
+          <Row
+            k="manifestBlobId"
+            v={onChain.manifestBlobId}
+            link={`${AGGREGATOR.replace(/\/$/, "")}/v1/blobs/${onChain.manifestBlobId}`}
+            mono
+          />
           <Row k="manifestOk" v={String(report.manifestOk)} />
           {report.reportBlobId && (
             <Row
               k="reportBlobId"
               v={report.reportBlobId}
               link={`${AGGREGATOR.replace(/\/$/, "")}/v1/blobs/${report.reportBlobId}`}
+              mono
             />
           )}
         </Box>
       </div>
 
-      <div>
-        <h2 className="font-semibold mb-3">Files</h2>
-        <ul className="border border-[var(--border)] rounded-lg divide-y divide-[var(--border)] text-sm">
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-fg-muted">
+          Files
+        </h2>
+        <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface/50 text-sm">
           {report.files.map((f, i) => (
-            <li key={i} className="p-3 grid grid-cols-1 md:grid-cols-12 gap-1.5 md:gap-2 md:items-center">
-              <span className="md:col-span-4 truncate">{f.filename}</span>
-              <span className="md:col-span-3 font-mono text-xs text-[var(--muted)] truncate" title={f.expected}>
-                exp {f.expected.slice(0, 12)}…
+            <li
+              key={i}
+              className="grid grid-cols-1 gap-1.5 px-4 py-3 transition-colors hover:bg-white/[0.025] md:grid-cols-12 md:items-center md:gap-2"
+            >
+              <span className="truncate md:col-span-4">{f.filename}</span>
+              <span className="truncate font-mono text-[11px] text-fg-dim md:col-span-3" title={f.expected}>
+                exp · {f.expected.slice(0, 12)}…
               </span>
-              <span className="md:col-span-3 font-mono text-xs text-[var(--muted)] truncate" title={f.actual}>
-                got {String(f.actual).slice(0, 12)}…
+              <span className="truncate font-mono text-[11px] text-fg-dim md:col-span-3" title={f.actual}>
+                got · {String(f.actual).slice(0, 12)}…
               </span>
-              <span className={`md:col-span-2 md:text-right font-semibold text-xs md:text-sm ${f.ok ? "text-[var(--accent)]" : "text-[var(--danger)]"}`}>
+              <span
+                className={`inline-flex items-center justify-start gap-1 text-xs font-semibold uppercase tracking-wider md:col-span-2 md:justify-end ${
+                  f.ok ? "text-[var(--color-emerald)]" : "text-[var(--color-danger)]"
+                }`}
+              >
+                {f.ok ? <CheckCircle2 className="size-3.5" /> : <XCircle className="size-3.5" />}
                 {f.ok ? "OK" : "FAIL"}
               </span>
             </li>
           ))}
         </ul>
-      </div>
+      </section>
 
       <details className="text-xs">
-        <summary className="cursor-pointer text-[var(--muted)]">Raw verification report JSON</summary>
-        <pre className="mt-2 p-3 bg-black/40 rounded-md overflow-auto">{JSON.stringify(report, null, 2)}</pre>
+        <summary className="cursor-pointer rounded-full border border-border-strong px-3 py-1.5 text-fg-muted hover:bg-white/[0.04] hover:text-fg w-fit">
+          Raw verification report JSON
+        </summary>
+        <pre className="mt-3 max-h-80 overflow-auto rounded-2xl border border-border bg-bg/60 p-4 text-[11px] leading-relaxed">
+          {JSON.stringify(report, null, 2)}
+        </pre>
       </details>
     </div>
   );
 }
 
-function Box({ title, children }: { title: string; children: React.ReactNode }) {
+function BigStatus({
+  valid,
+  okCount,
+  total,
+  manifestOk,
+}: {
+  valid: boolean;
+  okCount: number;
+  total: number;
+  manifestOk: boolean;
+}) {
+  const tone = valid
+    ? "from-[rgba(108,242,204,0.16)] to-[rgba(92,216,255,0.08)] border-[rgba(108,242,204,0.4)]"
+    : "from-[rgba(255,107,107,0.16)] to-[rgba(255,122,144,0.08)] border-[rgba(255,107,107,0.4)]";
+  const accent = valid ? "text-[var(--color-emerald)]" : "text-[var(--color-danger)]";
   return (
-    <div className="border border-[var(--border)] rounded-lg p-4 space-y-2">
-      <h3 className="font-semibold">{title}</h3>
-      <div className="text-sm space-y-1.5">{children}</div>
+    <div
+      className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br p-5 ${tone}`}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-10 -top-10 size-48 rounded-full blur-3xl"
+        style={{
+          background: valid
+            ? "radial-gradient(closest-side, rgba(108,242,204,0.35), transparent 70%)"
+            : "radial-gradient(closest-side, rgba(255,107,107,0.35), transparent 70%)",
+        }}
+      />
+      <p className="text-[11px] uppercase tracking-[0.22em] text-fg-dim">Status</p>
+      <p className={`mt-1 text-3xl font-bold tracking-tight ${accent}`}>
+        {valid ? "VALID" : "INVALID"}
+      </p>
+      <div className="mt-3 grid grid-cols-2 gap-3 text-[11px] uppercase tracking-wider text-fg-muted">
+        <div>
+          <p className="text-fg-dim">Files</p>
+          <p className={`mt-0.5 text-sm font-semibold tabular ${accent}`}>
+            {okCount} / {total}
+          </p>
+        </div>
+        <div>
+          <p className="text-fg-dim">Manifest</p>
+          <p className={`mt-0.5 text-sm font-semibold ${accent}`}>{manifestOk ? "match" : "mismatch"}</p>
+        </div>
+      </div>
     </div>
   );
 }
 
-function Row({ k, v, link }: { k: string; v: string; link?: string }) {
+function Box({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-surface/60 p-5">
+      <div className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-fg-dim">
+        {icon}
+        <span>{title}</span>
+      </div>
+      <div className="space-y-2 text-sm">{children}</div>
+    </div>
+  );
+}
+
+function Row({
+  k,
+  v,
+  link,
+  mono,
+}: {
+  k: string;
+  v: string;
+  link?: string;
+  mono?: boolean;
+}) {
   return (
     <div className="flex items-baseline gap-3">
-      <span className="text-[var(--muted)] w-32 shrink-0">{k}</span>
+      <span className="w-32 shrink-0 text-fg-dim">{k}</span>
       {link ? (
-        <a href={link} target="_blank" rel="noreferrer" className="font-mono text-xs break-all text-[var(--accent)] hover:underline">
+        <a
+          href={link}
+          target={link.startsWith("/") ? undefined : "_blank"}
+          rel={link.startsWith("/") ? undefined : "noreferrer"}
+          className={`break-all text-[var(--color-violet-soft)] hover:underline ${mono ? "font-mono text-xs" : ""}`}
+        >
           {v}
         </a>
       ) : (
-        <span className="font-mono text-xs break-all">{v}</span>
+        <span className={`break-all ${mono ? "font-mono text-xs" : ""}`}>{v}</span>
       )}
     </div>
   );

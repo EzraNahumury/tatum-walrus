@@ -3,6 +3,7 @@ import { getSuiClient } from "@/lib/sui/client";
 import { parseProofPackObject } from "@/lib/sui/parse";
 import { walrusFetchText } from "@/lib/walrus/fetch";
 import { answerQuestion } from "@/lib/ai";
+import { withRpcRetry } from "@/lib/retry";
 import type { ProofPackManifest } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -23,10 +24,12 @@ export async function POST(
     }
 
     const client = getSuiClient();
-    const obj = await client.getObject({
-      id,
-      options: { showContent: true, showOwner: true },
-    });
+    const obj = await withRpcRetry(() =>
+      client.getObject({
+        id,
+        options: { showContent: true, showOwner: true },
+      }),
+    );
     const onChain = parseProofPackObject(obj);
 
     const manifestText = await walrusFetchText(onChain.manifestBlobId);

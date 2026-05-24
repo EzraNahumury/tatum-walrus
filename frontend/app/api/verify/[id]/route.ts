@@ -5,6 +5,7 @@ import { walrusFetch, walrusFetchText } from "@/lib/walrus/fetch";
 import { walrusUpload } from "@/lib/walrus/upload";
 import { sha256Hex } from "@/lib/hash/sha256";
 import { env } from "@/lib/env";
+import { withRpcRetry } from "@/lib/retry";
 import type { Hex, ProofPackManifest, VerificationReport } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -17,10 +18,12 @@ export async function GET(
   const { id } = await ctx.params;
   try {
     const client = getSuiClient();
-    const obj = await client.getObject({
-      id,
-      options: { showContent: true, showOwner: true },
-    });
+    const obj = await withRpcRetry(() =>
+      client.getObject({
+        id,
+        options: { showContent: true, showOwner: true },
+      }),
+    );
     const onChain = parseProofPackObject(obj);
 
     const manifestText = await walrusFetchText(onChain.manifestBlobId);

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSuiClient } from "@/lib/sui/client";
 import { parseProofPackObject } from "@/lib/sui/parse";
 import { walrusFetchText } from "@/lib/walrus/fetch";
+import { withRpcRetry } from "@/lib/retry";
 import type { ProofPackManifest } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -13,10 +14,12 @@ export async function GET(
   const { id } = await ctx.params;
   try {
     const client = getSuiClient();
-    const obj = await client.getObject({
-      id,
-      options: { showContent: true, showOwner: true },
-    });
+    const obj = await withRpcRetry(() =>
+      client.getObject({
+        id,
+        options: { showContent: true, showOwner: true },
+      }),
+    );
     const onChain = parseProofPackObject(obj);
     let manifest: ProofPackManifest | null = null;
     try {

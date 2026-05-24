@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSuiClient } from "@/lib/sui/client";
+import { withRpcRetry } from "@/lib/retry";
 
 export const runtime = "nodejs";
 
@@ -10,7 +11,7 @@ export async function GET(req: NextRequest) {
   }
   try {
     const client = getSuiClient();
-    const balance = await client.getBalance({ owner });
+    const balance = await withRpcRetry(() => client.getBalance({ owner }));
     return NextResponse.json({
       owner,
       coinType: balance.coinType,

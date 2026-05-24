@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSuiClient } from "@/lib/sui/client";
 import { env } from "@/lib/env";
+import { withRpcRetry } from "@/lib/retry";
 
 export const runtime = "nodejs";
 
@@ -11,10 +12,12 @@ export async function GET(req: NextRequest) {
   }
   try {
     const client = getSuiClient();
-    const tx = await client.getTransactionBlock({
-      digest,
-      options: { showEffects: true, showObjectChanges: true, showEvents: true },
-    });
+    const tx = await withRpcRetry(() =>
+      client.getTransactionBlock({
+        digest,
+        options: { showEffects: true, showObjectChanges: true, showEvents: true },
+      }),
+    );
     const created = (tx.objectChanges ?? []).find(
       (c) =>
         c.type === "created" &&

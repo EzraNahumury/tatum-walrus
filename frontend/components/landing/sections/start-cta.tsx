@@ -71,9 +71,9 @@ export function StartCTA() {
                     "var(--font-tech), ui-sans-serif, system-ui",
                 }}
               >
-                Deposit SUI, pick a risk profile, and the agent borrows,
-                lends, and captures the spread to repay your debt — without
-                you watching Health Factor or chasing the best vault.
+                Drop files into a ProofPack. Walrus stores the bytes, Sui
+                anchors the manifest hash via Tatum RPC, and the AI cites
+                cryptographic proof on every answer — no trust required.
               </p>
             </div>
 

@@ -2,32 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, ExternalLink, FileCheck2, Layers, Plus, ShieldCheck } from "lucide-react";
+import { ArrowUpRight, Layers, Plus } from "lucide-react";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { Reveal } from "@/components/motion/Reveal";
 import { ErrorPanel } from "@/components/ErrorPanel";
 import { SkeletonRow } from "@/components/Skeleton";
+import { PackCard, type PackRow } from "@/components/PackCard";
 import type { Hex } from "@/lib/types";
-
-interface PackRow {
-  objectId: Hex;
-  title?: string;
-  version: number;
-  visibility: number;
-  manifestBlobId: string;
-  createdAtMs: number;
-  previousVersionId?: Hex;
-}
-
-function visLabel(n: number): string {
-  return n === 0 ? "private" : n === 1 ? "unlisted" : "public";
-}
-
-function visTone(n: number): string {
-  if (n === 0) return "bg-[rgba(255,196,107,0.12)] text-[var(--color-amber)]";
-  if (n === 1) return "bg-[rgba(145,129,245,0.14)] text-[var(--color-violet-soft)]";
-  return "bg-[rgba(108,242,204,0.12)] text-[var(--color-emerald)]";
-}
 
 export default function DashboardPage() {
   const account = useCurrentAccount();
@@ -162,101 +143,6 @@ export default function DashboardPage() {
         </ul>
       )}
     </div>
-  );
-}
-
-function PackCard({ row }: { row: PackRow }) {
-  const [meta, setMeta] = useState<{ title?: string; files?: number } | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch(`/api/proofpack/${row.objectId}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (cancelled || !d) return;
-        const m = d.manifest as { title?: string; files?: unknown[] } | null;
-        if (m) setMeta({ title: m.title, files: m.files?.length });
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [row.objectId]);
-
-  return (
-    <li className="group relative overflow-hidden rounded-2xl border border-border bg-surface/60 transition-all hover:-translate-y-[3px] hover:border-border-strong hover:shadow-[0_20px_60px_-20px_rgba(145,129,245,0.35)]">
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full opacity-0 transition-opacity duration-500 group-hover:opacity-80"
-        style={{ background: "radial-gradient(closest-side, rgba(145,129,245,0.35), transparent 70%)" }}
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-[var(--color-violet-soft)] to-transparent opacity-0 transition-opacity group-hover:opacity-60"
-      />
-
-      <Link href={`/pack/${row.objectId}`} className="block p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h3
-              className="truncate text-base font-semibold tracking-tight text-fg"
-              style={{ fontFamily: "var(--font-tech), ui-sans-serif, system-ui" }}
-            >
-              {meta?.title ?? "Untitled pack"}
-            </h3>
-            <p className="mt-1 truncate font-mono text-[11px] text-fg-dim">
-              {row.objectId.slice(0, 10)}…{row.objectId.slice(-6)}
-            </p>
-          </div>
-          <span
-            aria-hidden
-            className="grid size-9 shrink-0 place-items-center rounded-xl border border-border-strong bg-bg/40 text-[var(--color-emerald)] transition-transform group-hover:scale-110"
-            title="Anchored on Sui"
-          >
-            <ShieldCheck className="size-4" />
-          </span>
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] text-fg-dim">
-          <span className="rounded-full bg-white/[0.06] px-2 py-0.5 font-mono text-[10px] tracking-tight text-fg">
-            v{row.version}
-          </span>
-          <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${visTone(row.visibility)}`}>
-            {visLabel(row.visibility)}
-          </span>
-          {meta?.files !== undefined && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-bg/30 px-2 py-0.5 text-[10px] text-fg-muted">
-              <FileCheck2 className="size-3" /> {meta.files} file{meta.files === 1 ? "" : "s"}
-            </span>
-          )}
-          <span>· {new Date(row.createdAtMs).toLocaleDateString()}</span>
-        </div>
-      </Link>
-
-      <div className="flex items-center justify-between gap-2 border-t border-border/60 px-5 py-3 text-[11px]">
-        <Link
-          href={`/pack/${row.objectId}`}
-          className="inline-flex items-center gap-1 text-fg-muted hover:text-fg"
-        >
-          <ExternalLink className="size-3" /> Open
-        </Link>
-        <Link
-          href={`/verify/${row.objectId}`}
-          className="inline-flex items-center gap-1 rounded-full border border-border-strong px-3 py-1 uppercase tracking-wider text-fg-muted transition-colors hover:border-[var(--color-violet-soft)] hover:bg-[rgba(145,129,245,0.08)] hover:text-fg"
-        >
-          Verify <ArrowUpRight className="size-3" />
-        </Link>
-      </div>
-
-      {row.previousVersionId && (
-        <Link
-          href={`/pack/${row.previousVersionId}`}
-          className="block border-t border-border/60 px-5 py-2 text-[11px] text-fg-dim hover:bg-white/[0.02] hover:text-[var(--color-violet-soft)]"
-        >
-          ← previous version
-        </Link>
-      )}
-    </li>
   );
 }
 

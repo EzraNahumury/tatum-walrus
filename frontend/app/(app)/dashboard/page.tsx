@@ -2,13 +2,20 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { ArrowUpRight, Layers, Plus } from "lucide-react";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { Reveal } from "@/components/motion/Reveal";
 import { ErrorPanel } from "@/components/ErrorPanel";
 import { SkeletonRow } from "@/components/Skeleton";
-import { PackCard, type PackRow } from "@/components/PackCard";
+import type { PackRow } from "@/components/PackCard";
 import type { Hex } from "@/lib/types";
+
+// Defer framer-motion until cards actually render.
+const PackCard = dynamic(
+  () => import("@/components/PackCard").then((m) => ({ default: m.PackCard })),
+  { ssr: false, loading: () => <SkeletonRow /> },
+);
 
 export default function DashboardPage() {
   const account = useCurrentAccount();
@@ -16,13 +23,14 @@ export default function DashboardPage() {
   const [err, setErr] = useState<string | null>(null);
 
   const pkgId = process.env.NEXT_PUBLIC_PACKAGE_ID;
+  const address = account?.address;
 
   useEffect(() => {
-    if (!account || !pkgId) return;
+    if (!address || !pkgId) return;
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/owned?owner=${account.address}`);
+        const res = await fetch(`/api/owned?owner=${address}`);
         if (!res.ok) {
           const t = await res.text();
           throw new Error(`/api/owned ${res.status}: ${t}`);
@@ -54,7 +62,7 @@ export default function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [account, pkgId]);
+  }, [address, pkgId]);
 
   if (!account) {
     return (

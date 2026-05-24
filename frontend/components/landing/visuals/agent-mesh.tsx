@@ -18,7 +18,7 @@ type Pulse = {
   hue: number;
 };
 
-const LABELS = ["SUI", "USDC", "Suilend", "Scallop", "Cetus", "Shadow"];
+const LABELS = ["Sui", "Walrus", "Tatum", "Manifest", "Files", "AI"];
 
 export function AgentMesh() {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -149,11 +149,11 @@ export function AgentMesh() {
       ctx!.font = "600 9px var(--font-geist-mono), ui-monospace, monospace";
       ctx!.textAlign = "center";
       ctx!.textBaseline = "middle";
-      ctx!.fillText("AGENT", centerX, centerY);
+      ctx!.fillText("PROOFPACK", centerX, centerY);
 
       ctx!.fillStyle = "rgba(201, 211, 207, 0.55)";
       ctx!.font = "500 9px var(--font-geist-mono), ui-monospace, monospace";
-      ctx!.fillText("LTV 55%", centerX, centerY + baseR + 14);
+      ctx!.fillText("SHA-256 anchor", centerX, centerY + baseR + 14);
 
       centerPulse *= 0.92;
     }

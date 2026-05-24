@@ -1,9 +1,18 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
   return (
     <div className="space-y-16">
       <section className="space-y-6 max-w-3xl">
+        <Image
+          src="/logo.png"
+          alt="ProofPack AI logo"
+          width={96}
+          height={96}
+          priority
+          className="rounded-xl"
+        />
         <span className="inline-block text-xs uppercase tracking-[0.3em] text-[var(--accent)]">
           Sui · Walrus · Tatum
         </span>

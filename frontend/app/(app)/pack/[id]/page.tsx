@@ -4,6 +4,7 @@ import { ArrowUpRight, ExternalLink, Files as FilesIcon, Fingerprint } from "luc
 import { ChatPanel } from "@/components/ChatPanel";
 import { BackLink } from "@/components/BackLink";
 import { CopyButton } from "@/components/CopyButton";
+import { WalletGate } from "@/components/WalletGate";
 import type { ProofPackManifest, ProofPackOnChain } from "@/lib/types";
 
 interface PackResp {
@@ -65,6 +66,10 @@ export default async function PackDetailPage({
   return (
     <div className="space-y-10">
       <BackLink href="/dashboard" label="Back to dashboard" />
+      <WalletGate
+        title="Connect a Sui wallet"
+        body="Pack details are only shown to connected wallets. Use the public verifier to check this pack without signing in."
+      >
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0 max-w-3xl">
           <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-fg-dim">
@@ -156,6 +161,7 @@ export default async function PackDetailPage({
       )}
 
       <ChatPanel objectId={onChain.objectId} />
+      </WalletGate>
     </div>
   );
 }

@@ -2,16 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowUpRight, Layers, Plus } from "lucide-react";
 import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
-import type { Hex } from "@/lib/types";
-import { SkeletonRow } from "@/components/Skeleton";
+import { Reveal } from "@/components/motion/Reveal";
 import { ErrorPanel } from "@/components/ErrorPanel";
-
-function visLabel(n: number): string {
-  if (n === 0) return "private";
-  if (n === 1) return "unlisted";
-  return "public";
-}
+import { SkeletonRow } from "@/components/Skeleton";
+import type { Hex } from "@/lib/types";
 
 interface PackRow {
   objectId: Hex;
@@ -21,6 +17,16 @@ interface PackRow {
   manifestBlobId: string;
   createdAtMs: number;
   previousVersionId?: Hex;
+}
+
+function visLabel(n: number): string {
+  return n === 0 ? "private" : n === 1 ? "unlisted" : "public";
+}
+
+function visTone(n: number): string {
+  if (n === 0) return "bg-[rgba(255,196,107,0.12)] text-[var(--color-amber)]";
+  if (n === 1) return "bg-[rgba(145,129,245,0.14)] text-[var(--color-violet-soft)]";
+  return "bg-[rgba(108,242,204,0.12)] text-[var(--color-emerald)]";
 }
 
 export default function DashboardPage() {
@@ -62,75 +68,172 @@ export default function DashboardPage() {
         if (!cancelled) setErr(String(e));
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [account, client, pkgId]);
 
   if (!account) {
-    return <p className="text-[var(--muted)]">Connect a Sui wallet to view your packs.</p>;
+    return (
+      <Reveal>
+        <EmptyState
+          icon={<Layers className="size-6" />}
+          title="Connect a Sui wallet"
+          body="Your ProofPacks will appear here once a wallet is connected."
+        />
+      </Reveal>
+    );
   }
+
   if (!pkgId) {
     return (
-      <p className="text-[var(--danger)] text-sm">
-        NEXT_PUBLIC_PACKAGE_ID is not set. Publish the Move package and update <code>.env.local</code>.
-      </p>
+      <ErrorPanel
+        title="Package ID missing"
+        message="NEXT_PUBLIC_PACKAGE_ID is not set. Publish the Move package and update .env.local."
+      />
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold">Your ProofPacks</h1>
-        <Link
-          href="/pack/new"
-          className="px-4 py-2 rounded-md bg-[var(--accent)] text-[#0b0d12] font-semibold text-sm"
-        >
-          New Pack
-        </Link>
-      </div>
-      {err && <ErrorPanel title="Could not load packs" message={err} />}
-      {rows === null && (
-        <div className="border border-[var(--border)] rounded-lg overflow-hidden">
+    <div className="space-y-8">
+      <Reveal>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.22em] text-fg-dim">Your packs</p>
+            <h1
+              className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl"
+              style={{ fontFamily: "var(--font-tech), ui-sans-serif, system-ui" }}
+            >
+              ProofPack vault
+            </h1>
+          </div>
+          <Link
+            href="/pack/new"
+            className="group inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold tracking-tight text-bg shadow-[0_-4px_8px_rgba(255,255,255,0.25)_inset] transition-transform hover:-translate-y-0.5"
+          >
+            <Plus className="size-4" />
+            <span>New Pack</span>
+          </Link>
+        </div>
+      </Reveal>
+
+      {err && (
+        <Reveal>
+          <ErrorPanel title="Could not load packs" message={err} />
+        </Reveal>
+      )}
+
+      {!err && rows === null && (
+        <div className="overflow-hidden rounded-2xl border border-border bg-surface/50">
           <SkeletonRow />
           <SkeletonRow />
           <SkeletonRow />
         </div>
       )}
-      {rows && rows.length === 0 && (
-        <p className="text-[var(--muted)]">No packs yet. Create one to get started.</p>
-      )}
-      {rows && rows.length > 0 && (
-        <ul className="border border-[var(--border)] rounded-lg divide-y divide-[var(--border)]">
-          {rows.map((r) => (
-            <li key={r.objectId} className="p-4 flex items-center justify-between">
-              <div>
-                <Link href={`/pack/${r.objectId}`} className="font-medium hover:text-[var(--accent)]">
-                  {r.objectId.slice(0, 10)}…{r.objectId.slice(-6)}
-                </Link>
-                <div className="text-xs text-[var(--muted)] flex items-center gap-2 flex-wrap">
-                  <span className="px-1.5 py-0.5 rounded bg-[var(--accent)]/15 text-[var(--accent)] font-semibold">v{r.version}</span>
-                  <span>vis {visLabel(r.visibility)}</span>
-                  <span>· {new Date(r.createdAtMs).toLocaleString()}</span>
-                  {r.previousVersionId && (
-                    <Link
-                      href={`/pack/${r.previousVersionId}`}
-                      className="underline hover:text-[var(--accent)]"
-                      title={r.previousVersionId}
-                    >
-                      ← prev version
-                    </Link>
-                  )}
-                </div>
-              </div>
+
+      {!err && rows && rows.length === 0 && (
+        <Reveal>
+          <EmptyState
+            icon={<Layers className="size-6" />}
+            title="No packs yet"
+            body="Create your first ProofPack — drop in files, sign once, share a verifier link."
+            action={
               <Link
-                href={`/verify/${r.objectId}`}
-                className="text-xs px-3 py-1.5 border border-[var(--border)] rounded-md hover:border-[var(--accent)]"
+                href="/pack/new"
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white"
+                style={{ background: "var(--gradient-brand)" }}
               >
-                Verify
+                Create ProofPack <ArrowUpRight className="size-3.5" />
               </Link>
-            </li>
+            }
+          />
+        </Reveal>
+      )}
+
+      {!err && rows && rows.length > 0 && (
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {rows.map((r, i) => (
+            <Reveal key={r.objectId} delay={i * 0.04}>
+              <PackCard row={r} />
+            </Reveal>
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+function PackCard({ row }: { row: PackRow }) {
+  return (
+    <li className="group relative overflow-hidden rounded-2xl border border-border bg-surface/60 p-5 transition-all hover:-translate-y-[2px] hover:border-border-strong">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-12 -top-12 size-32 rounded-full opacity-0 transition-opacity duration-500 group-hover:opacity-60"
+        style={{ background: "radial-gradient(closest-side, rgba(145,129,245,0.35), transparent 70%)" }}
+      />
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <Link
+            href={`/pack/${row.objectId}`}
+            className="block font-mono text-sm font-semibold text-fg hover:text-[var(--color-violet-soft)]"
+          >
+            {row.objectId.slice(0, 12)}…{row.objectId.slice(-6)}
+          </Link>
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-fg-dim">
+            <span className="rounded-full bg-white/[0.06] px-1.5 py-0.5 font-mono text-[10px] tracking-tight text-fg">
+              v{row.version}
+            </span>
+            <span className={`rounded-full px-1.5 py-0.5 text-[10px] uppercase tracking-wider ${visTone(row.visibility)}`}>
+              {visLabel(row.visibility)}
+            </span>
+            <span>· {new Date(row.createdAtMs).toLocaleDateString()}</span>
+          </div>
+        </div>
+        <Link
+          href={`/verify/${row.objectId}`}
+          className="inline-flex items-center gap-1 rounded-full border border-border-strong px-3 py-1.5 text-[11px] uppercase tracking-wider text-fg-muted transition-colors hover:bg-white/[0.04] hover:text-fg"
+        >
+          Verify <ArrowUpRight className="size-3" />
+        </Link>
+      </div>
+      {row.previousVersionId && (
+        <Link
+          href={`/pack/${row.previousVersionId}`}
+          className="mt-3 inline-flex items-center gap-1 text-[11px] text-fg-dim hover:text-[var(--color-violet-soft)]"
+        >
+          ← previous version
+        </Link>
+      )}
+    </li>
+  );
+}
+
+function EmptyState({
+  icon,
+  title,
+  body,
+  action,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border bg-surface/40 px-6 py-16 text-center">
+      <span className="grid size-12 place-items-center rounded-2xl border border-border-strong bg-bg/40 text-fg-muted">
+        {icon}
+      </span>
+      <div>
+        <h3
+          className="text-xl font-semibold tracking-tight"
+          style={{ fontFamily: "var(--font-tech), ui-sans-serif, system-ui" }}
+        >
+          {title}
+        </h3>
+        <p className="mt-1 max-w-md text-sm text-fg-muted">{body}</p>
+      </div>
+      {action}
     </div>
   );
 }

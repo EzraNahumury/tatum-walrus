@@ -5,6 +5,12 @@ import Link from "next/link";
 import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
 import type { Hex } from "@/lib/types";
 
+function visLabel(n: number): string {
+  if (n === 0) return "private";
+  if (n === 1) return "unlisted";
+  return "public";
+}
+
 interface PackRow {
   objectId: Hex;
   title?: string;
@@ -12,6 +18,7 @@ interface PackRow {
   visibility: number;
   manifestBlobId: string;
   createdAtMs: number;
+  previousVersionId?: Hex;
 }
 
 export default function DashboardPage() {
@@ -36,12 +43,16 @@ export default function DashboardPage() {
         for (const item of owned.data) {
           const f = (item.data?.content as { fields?: Record<string, unknown> } | undefined)?.fields;
           if (!f) continue;
+          const pv = f.previous_version as { vec?: string[] } | undefined;
+          const previousVersionId =
+            pv && Array.isArray(pv.vec) && pv.vec.length > 0 ? (pv.vec[0] as Hex) : undefined;
           data.push({
             objectId: item.data!.objectId as Hex,
             version: Number(f.version),
             visibility: Number(f.visibility),
             manifestBlobId: String(f.manifest_blob_id),
             createdAtMs: Number(f.created_at_ms),
+            previousVersionId,
           });
         }
         if (!cancelled) setRows(data);
@@ -87,8 +98,19 @@ export default function DashboardPage() {
                 <Link href={`/pack/${r.objectId}`} className="font-medium hover:text-[var(--accent)]">
                   {r.objectId.slice(0, 10)}…{r.objectId.slice(-6)}
                 </Link>
-                <div className="text-xs text-[var(--muted)]">
-                  v{r.version} · vis {r.visibility} · {new Date(r.createdAtMs).toLocaleString()}
+                <div className="text-xs text-[var(--muted)] flex items-center gap-2 flex-wrap">
+                  <span className="px-1.5 py-0.5 rounded bg-[var(--accent)]/15 text-[var(--accent)] font-semibold">v{r.version}</span>
+                  <span>vis {visLabel(r.visibility)}</span>
+                  <span>· {new Date(r.createdAtMs).toLocaleString()}</span>
+                  {r.previousVersionId && (
+                    <Link
+                      href={`/pack/${r.previousVersionId}`}
+                      className="underline hover:text-[var(--accent)]"
+                      title={r.previousVersionId}
+                    >
+                      ← prev version
+                    </Link>
+                  )}
                 </div>
               </div>
               <Link

@@ -70,6 +70,9 @@ export default async function PackDetailPage({
           <Row k="version" v={String(onChain.version)} />
           <Row k="visibility" v={onChain.visibility} />
           <Row k="createdAt" v={new Date(onChain.createdAtMs).toISOString()} />
+          {onChain.previousVersionId && (
+            <Row k="previousVersion" v={onChain.previousVersionId} link={`/pack/${onChain.previousVersionId}`} />
+          )}
         </Box>
         <Box title="Manifest (Walrus)">
           <Row k="manifestBlobId" v={onChain.manifestBlobId} link={manifestUrl} />

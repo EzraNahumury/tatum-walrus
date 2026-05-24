@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { ArrowUpRight, ExternalLink, Files as FilesIcon, Fingerprint } from "lucide-react";
 import { ChatPanel } from "@/components/ChatPanel";
 import { BackLink } from "@/components/BackLink";
+import { CopyButton } from "@/components/CopyButton";
 import type { ProofPackManifest, ProofPackOnChain } from "@/lib/types";
 
 interface PackResp {
@@ -108,18 +109,18 @@ export default async function PackDetailPage({
 
       <div className="grid gap-4 md:grid-cols-2">
         <Box title="On-chain" icon={<Fingerprint className="size-3.5" />}>
-          <Row k="objectId" v={onChain.objectId} link={explorer} mono />
-          <Row k="owner" v={onChain.owner} mono />
+          <Row k="objectId" v={onChain.objectId} link={explorer} mono copy />
+          <Row k="owner" v={onChain.owner} mono copy />
           <Row k="version" v={String(onChain.version)} />
           <Row k="visibility" v={onChain.visibility} />
           <Row k="createdAt" v={new Date(onChain.createdAtMs).toISOString()} mono />
           {onChain.previousVersionId && (
-            <Row k="previousVersion" v={onChain.previousVersionId} link={`/pack/${onChain.previousVersionId}`} mono />
+            <Row k="previousVersion" v={onChain.previousVersionId} link={`/pack/${onChain.previousVersionId}`} mono copy />
           )}
         </Box>
         <Box title="Manifest (Walrus)" icon={<FilesIcon className="size-3.5" />}>
-          <Row k="manifestBlobId" v={onChain.manifestBlobId} link={manifestUrl} mono />
-          <Row k="manifestHash" v={onChain.manifestHash} mono />
+          <Row k="manifestBlobId" v={onChain.manifestBlobId} link={manifestUrl} mono copy />
+          <Row k="manifestHash" v={onChain.manifestHash} mono copy />
           <Row k="files" v={String(manifest?.files.length ?? 0)} />
         </Box>
       </div>
@@ -184,27 +185,32 @@ function Row({
   v,
   link,
   mono,
+  copy,
 }: {
   k: string;
   v: string;
   link?: string;
   mono?: boolean;
+  copy?: boolean;
 }) {
   return (
     <div className="flex items-baseline gap-3">
       <span className="w-32 shrink-0 text-fg-dim">{k}</span>
-      {link ? (
-        <a
-          href={link}
-          target={link.startsWith("/") ? undefined : "_blank"}
-          rel={link.startsWith("/") ? undefined : "noreferrer"}
-          className={`break-all text-[var(--color-violet-soft)] hover:underline ${mono ? "font-mono text-xs" : ""}`}
-        >
-          {v}
-        </a>
-      ) : (
-        <span className={`break-all ${mono ? "font-mono text-xs" : ""}`}>{v}</span>
-      )}
+      <div className="flex min-w-0 flex-1 items-baseline gap-2">
+        {link ? (
+          <a
+            href={link}
+            target={link.startsWith("/") ? undefined : "_blank"}
+            rel={link.startsWith("/") ? undefined : "noreferrer"}
+            className={`min-w-0 break-all text-[var(--color-violet-soft)] hover:underline ${mono ? "font-mono text-xs" : ""}`}
+          >
+            {v}
+          </a>
+        ) : (
+          <span className={`min-w-0 break-all ${mono ? "font-mono text-xs" : ""}`}>{v}</span>
+        )}
+        {copy && <CopyButton value={v} size="xs" label={k} />}
+      </div>
     </div>
   );
 }

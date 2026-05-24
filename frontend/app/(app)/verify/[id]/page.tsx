@@ -1,6 +1,8 @@
 import { headers } from "next/headers";
 import { CheckCircle2, ExternalLink, Hash, Shield, XCircle } from "lucide-react";
 import { BackLink } from "@/components/BackLink";
+import { CopyButton } from "@/components/CopyButton";
+import { JsonView } from "@/components/JsonView";
 import type {
   ProofPackManifest,
   ProofPackOnChain,
@@ -84,11 +86,11 @@ export default async function VerifyDetail({
 
       <div className="grid gap-4 md:grid-cols-2">
         <Box title="On-chain anchor" icon={<Hash className="size-3.5" />}>
-          <Row k="objectId" v={onChain.objectId} link={explorer} mono />
-          <Row k="owner" v={onChain.owner} mono />
-          <Row k="manifestHash" v={onChain.manifestHash} mono />
+          <Row k="objectId" v={onChain.objectId} link={explorer} mono copy />
+          <Row k="owner" v={onChain.owner} mono copy />
+          <Row k="manifestHash" v={onChain.manifestHash} mono copy />
           <Row k="network" v={report.network} />
-          <Row k="rpc" v={report.tatumRpcUrl} mono />
+          <Row k="rpc" v={report.tatumRpcUrl} mono copy />
         </Box>
         <Box title="Manifest check" icon={<CheckCircle2 className="size-3.5" />}>
           <Row
@@ -96,6 +98,7 @@ export default async function VerifyDetail({
             v={onChain.manifestBlobId}
             link={`${AGGREGATOR.replace(/\/$/, "")}/v1/blobs/${onChain.manifestBlobId}`}
             mono
+            copy
           />
           <Row k="manifestOk" v={String(report.manifestOk)} />
           {report.reportBlobId && (
@@ -104,6 +107,7 @@ export default async function VerifyDetail({
               v={report.reportBlobId}
               link={`${AGGREGATOR.replace(/\/$/, "")}/v1/blobs/${report.reportBlobId}`}
               mono
+              copy
             />
           )}
         </Box>
@@ -139,13 +143,11 @@ export default async function VerifyDetail({
         </ul>
       </section>
 
-      <details className="text-xs">
+      <details className="space-y-3 text-xs">
         <summary className="cursor-pointer rounded-full border border-border-strong px-3 py-1.5 text-fg-muted hover:bg-white/[0.04] hover:text-fg w-fit">
           Raw verification report JSON
         </summary>
-        <pre className="mt-3 max-h-80 overflow-auto rounded-2xl border border-border bg-bg/60 p-4 text-[11px] leading-relaxed">
-          {JSON.stringify(report, null, 2)}
-        </pre>
+        <JsonView data={report} filename="verify-report.json" />
       </details>
     </div>
   );
@@ -224,27 +226,32 @@ function Row({
   v,
   link,
   mono,
+  copy,
 }: {
   k: string;
   v: string;
   link?: string;
   mono?: boolean;
+  copy?: boolean;
 }) {
   return (
     <div className="flex items-baseline gap-3">
       <span className="w-32 shrink-0 text-fg-dim">{k}</span>
-      {link ? (
-        <a
-          href={link}
-          target={link.startsWith("/") ? undefined : "_blank"}
-          rel={link.startsWith("/") ? undefined : "noreferrer"}
-          className={`break-all text-[var(--color-violet-soft)] hover:underline ${mono ? "font-mono text-xs" : ""}`}
-        >
-          {v}
-        </a>
-      ) : (
-        <span className={`break-all ${mono ? "font-mono text-xs" : ""}`}>{v}</span>
-      )}
+      <div className="flex min-w-0 flex-1 items-baseline gap-2">
+        {link ? (
+          <a
+            href={link}
+            target={link.startsWith("/") ? undefined : "_blank"}
+            rel={link.startsWith("/") ? undefined : "noreferrer"}
+            className={`min-w-0 break-all text-[var(--color-violet-soft)] hover:underline ${mono ? "font-mono text-xs" : ""}`}
+          >
+            {v}
+          </a>
+        ) : (
+          <span className={`min-w-0 break-all ${mono ? "font-mono text-xs" : ""}`}>{v}</span>
+        )}
+        {copy && <CopyButton value={v} size="xs" label={k} />}
+      </div>
     </div>
   );
 }

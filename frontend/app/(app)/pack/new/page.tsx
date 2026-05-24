@@ -6,7 +6,6 @@ import { ArrowUpRight, FileText, Hash, Sparkles, Tag } from "lucide-react";
 import {
   useCurrentAccount,
   useSignTransaction,
-  useSuiClient,
 } from "@mysten/dapp-kit";
 import { FileDropzone } from "@/components/FileDropzone";
 import { LoadingLogo } from "@/components/LoadingLogo";
@@ -18,11 +17,6 @@ import { buildManifest, hashManifest } from "@/lib/manifest";
 import { buildCreateProofPackTx, visibilityToU8 } from "@/lib/sui/tx";
 import type { Hex, UploadResult, Visibility } from "@/lib/types";
 
-function toBase64(bytes: Uint8Array): string {
-  let s = "";
-  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-  return btoa(s);
-}
 
 type Phase =
   | "idle"
@@ -46,7 +40,6 @@ const PHASE_LABEL: Record<Phase, string> = {
 export default function NewPackPage() {
   const router = useRouter();
   const account = useCurrentAccount();
-  const suiClient = useSuiClient();
   const { mutateAsync: signTransaction } = useSignTransaction();
 
   const [title, setTitle] = useState("");
@@ -117,10 +110,10 @@ export default function NewPackPage() {
         manifestHashHex: manJson.manifestHash,
         visibility: visibilityToU8(visibility),
       });
+      tx.setSender(account.address);
 
-      // Build full tx bytes locally (server is not in the trust path for
-      // signing). The wallet then signs only the bytes we built.
-      const txBytes = await tx.build({ client: suiClient });
+      // Wallet signs locally + returns base64 tx bytes. We never round-trip
+      // unsigned bytes through the server.
       const signed = await signTransaction({ transaction: tx });
 
       // Execute through our server route — Tatum gateway blocks browser POSTs
@@ -130,7 +123,7 @@ export default function NewPackPage() {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          transactionBlock: signed.bytes ?? toBase64(txBytes),
+          transactionBlock: signed.bytes,
           signature: signed.signature,
         }),
       });

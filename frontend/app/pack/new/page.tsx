@@ -8,6 +8,7 @@ import {
 } from "@mysten/dapp-kit";
 import { FileDropzone } from "@/components/FileDropzone";
 import { Spinner } from "@/components/Spinner";
+import { ErrorPanel } from "@/components/ErrorPanel";
 import { sha256OfFile } from "@/lib/hash/sha256";
 import { buildManifest, hashManifest } from "@/lib/manifest";
 import { buildCreateProofPackTx, visibilityToU8 } from "@/lib/sui/tx";
@@ -170,8 +171,14 @@ export default function NewPackPage() {
         {phase === "uploading-files" && <Spinner label="Uploading to Walrus…" />}
         {phase === "uploading-manifest" && <Spinner label="Anchoring manifest…" />}
         {phase === "signing" && <Spinner label="Awaiting wallet signature…" />}
-        {err && <span className="text-sm text-[var(--danger)]">{err}</span>}
       </div>
+      {err && (
+        <ErrorPanel
+          title="Pack creation failed"
+          message={err}
+          action={{ label: "Reset and try again", onClick: () => { setErr(null); setPhase("idle"); } }}
+        />
+      )}
     </div>
   );
 }

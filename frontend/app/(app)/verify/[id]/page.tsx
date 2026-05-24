@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { CheckCircle2, ExternalLink, Hash, Shield, XCircle } from "lucide-react";
+import { BackLink } from "@/components/BackLink";
 import type {
   ProofPackManifest,
   ProofPackOnChain,
@@ -37,14 +38,15 @@ export default async function VerifyDetail({
 
   if (!res.ok || data.error) {
     return (
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-2xl space-y-4">
+        <BackLink href="/dashboard" label="Back to dashboard" />
         <h1
           className="text-2xl font-semibold tracking-tight"
           style={{ fontFamily: "var(--font-tech), ui-sans-serif, system-ui" }}
         >
           Verification
         </h1>
-        <p className="mt-3 rounded-2xl border border-[var(--color-danger)]/30 bg-[rgba(255,107,107,0.06)] px-4 py-3 text-sm text-[var(--color-danger)]">
+        <p className="rounded-2xl border border-[var(--color-danger)]/30 bg-[rgba(255,107,107,0.06)] px-4 py-3 text-sm text-[var(--color-danger)]">
           {data.message ?? data.error}
         </p>
       </div>
@@ -59,6 +61,7 @@ export default async function VerifyDetail({
 
   return (
     <div className="space-y-10">
+      <BackLink href="/dashboard" label="Back to dashboard" />
       <header className="grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-center">
         <div>
           <p className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.22em] text-fg-dim">

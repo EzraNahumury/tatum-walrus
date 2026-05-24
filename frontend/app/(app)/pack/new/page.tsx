@@ -11,6 +11,7 @@ import { FileDropzone } from "@/components/FileDropzone";
 import { LoadingLogo } from "@/components/LoadingLogo";
 import { ErrorPanel } from "@/components/ErrorPanel";
 import { Reveal } from "@/components/motion/Reveal";
+import { BackLink } from "@/components/BackLink";
 import { sha256OfFile } from "@/lib/hash/sha256";
 import { buildManifest, hashManifest } from "@/lib/manifest";
 import { buildCreateProofPackTx, visibilityToU8 } from "@/lib/sui/tx";
@@ -117,6 +118,7 @@ export default function NewPackPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-10">
+      <BackLink href="/dashboard" label="Back to dashboard" />
       <Reveal>
         <div>
           <p className="text-[11px] uppercase tracking-[0.22em] text-fg-dim">Step 1 of 1</p>

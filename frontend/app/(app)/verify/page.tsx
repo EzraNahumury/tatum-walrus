@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, ScanSearch } from "lucide-react";
 import { Reveal } from "@/components/motion/Reveal";
+import { BackLink } from "@/components/BackLink";
 
 export default function VerifyEntryPage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function VerifyEntryPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-10">
+      <BackLink href="/" label="Back to home" />
       <Reveal>
         <div className="text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-surface/60 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-fg-muted">

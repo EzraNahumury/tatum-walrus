@@ -2,6 +2,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { ArrowUpRight, ExternalLink, Files as FilesIcon, Fingerprint } from "lucide-react";
 import { ChatPanel } from "@/components/ChatPanel";
+import { BackLink } from "@/components/BackLink";
 import type { ProofPackManifest, ProofPackOnChain } from "@/lib/types";
 
 interface PackResp {
@@ -40,14 +41,15 @@ export default async function PackDetailPage({
 
   if (!res.ok || data.error) {
     return (
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-2xl space-y-4">
+        <BackLink href="/dashboard" label="Back to dashboard" />
         <h1
           className="text-2xl font-semibold tracking-tight"
           style={{ fontFamily: "var(--font-tech), ui-sans-serif, system-ui" }}
         >
           ProofPack
         </h1>
-        <p className="mt-3 rounded-2xl border border-[var(--color-danger)]/30 bg-[rgba(255,107,107,0.06)] px-4 py-3 text-sm text-[var(--color-danger)]">
+        <p className="rounded-2xl border border-[var(--color-danger)]/30 bg-[rgba(255,107,107,0.06)] px-4 py-3 text-sm text-[var(--color-danger)]">
           {data.message ?? data.error ?? "Not found"}
         </p>
       </div>
@@ -61,6 +63,7 @@ export default async function PackDetailPage({
 
   return (
     <div className="space-y-10">
+      <BackLink href="/dashboard" label="Back to dashboard" />
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0 max-w-3xl">
           <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-fg-dim">

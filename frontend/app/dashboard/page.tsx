@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
 import type { Hex } from "@/lib/types";
+import { SkeletonRow } from "@/components/Skeleton";
+import { ErrorPanel } from "@/components/ErrorPanel";
 
 function visLabel(n: number): string {
   if (n === 0) return "private";
@@ -85,8 +87,14 @@ export default function DashboardPage() {
           New Pack
         </Link>
       </div>
-      {err && <p className="text-[var(--danger)] text-sm">{err}</p>}
-      {rows === null && <p className="text-[var(--muted)]">Loading…</p>}
+      {err && <ErrorPanel title="Could not load packs" message={err} />}
+      {rows === null && (
+        <div className="border border-[var(--border)] rounded-lg overflow-hidden">
+          <SkeletonRow />
+          <SkeletonRow />
+          <SkeletonRow />
+        </div>
+      )}
       {rows && rows.length === 0 && (
         <p className="text-[var(--muted)]">No packs yet. Create one to get started.</p>
       )}

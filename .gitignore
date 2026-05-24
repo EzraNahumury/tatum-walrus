@@ -1,0 +1,40 @@
+# Env (NEVER commit secrets)
+.env
+.env.local
+.env.*.local
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Node
+node_modules/
+**/node_modules/
+
+# Next
+.next/
+out/
+.vercel/
+
+# Build
+build/
+dist/
+
+# Move
+sc/build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+
+# tsx / temp
+.turbo/
+.cache/

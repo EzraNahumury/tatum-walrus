@@ -78,7 +78,7 @@ export function ChatPanel({ objectId }: { objectId: string }) {
                       {t.a.references.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
                           {t.a.references.map((r, j) => (
-                            <CitationChip key={j} ref={r} />
+                            <CitationChip key={j} citation={r} />
                           ))}
                         </div>
                       )}

@@ -3,14 +3,14 @@
 import { useEffect, useRef } from "react";
 
 const TIERS = [
-  { name: "LIQUIDATION", max: 1.0, hue: 8 },
-  { name: "DEFENSE", max: 1.3, hue: 28 },
-  { name: "SAFE", max: 1.5, hue: 140 },
-  { name: "HEALTHY", max: 2.5, hue: 195 },
+  { name: "TAMPERED", max: 25, hue: 8 },
+  { name: "INVALID", max: 60, hue: 28 },
+  { name: "VALID", max: 95, hue: 140 },
+  { name: "ANCHORED", max: 100, hue: 195 },
 ];
 
-const MAX_HF = 2.5;
-const TARGET_HF = 1.85;
+const MAX_HF = 100;
+const TARGET_HF = 100;
 const CYCLE_MS = 5200;
 
 export function ReputationBar() {
@@ -70,11 +70,11 @@ export function ReputationBar() {
       ctx!.font = "600 36px ui-sans-serif, system-ui, -apple-system";
       ctx!.textAlign = "center";
       ctx!.textBaseline = "alphabetic";
-      ctx!.fillText(hf.toFixed(2), W / 2, H * 0.42);
+      ctx!.fillText(`${hf.toFixed(0)}%`, W / 2, H * 0.42);
 
       ctx!.fillStyle = "rgba(201, 211, 207, 0.55)";
       ctx!.font = "500 10px ui-monospace, SFMono-Regular, Menlo, monospace";
-      ctx!.fillText("HEALTH FACTOR · TARGET 1.85", W / 2, H * 0.42 + 16);
+      ctx!.fillText("ANCHOR INTEGRITY · TARGET 100%", W / 2, H * 0.42 + 16);
 
       const barY = H * 0.66;
       const padX = 32;

@@ -1,0 +1,14 @@
+REGISTRAR SIGNATURE
+
+I, Dr. Jane Smith, Registrar of Acme University, certify that the diploma
+and transcript in this ProofPack accurately reflect the academic record of
+Garry Doe (student ID ACME-2022-1834) as of 2026-04-15.
+
+This pack was created in collaboration with the Office of the Registrar
+and may be verified by any third party (employer, government agency,
+graduate school) by recomputing SHA-256 against the on-chain hash on Sui.
+
+Signed,
+Dr. Jane Smith
+Registrar, Acme University
+seal: ACME-2026-CS-0042

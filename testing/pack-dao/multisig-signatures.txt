@@ -1,0 +1,18 @@
+MULTISIG ATTESTATION
+
+This Q1 2026 transparency report is signed by 4 of 5 multisig holders
+on 2026-04-02 at 14:22 UTC.
+
+Signers:
+- 0x4a2b1f8e... (Treasury Chair)
+- 0x91f0d3c5... (Vice Chair)
+- 0x8c451158... (Operations Lead)
+- 0xe7d9532d... (Community Lead)
+
+Abstained:
+- 0x5d169377... (out of office)
+
+Threshold reached: 4/5 (required: 3/5). Report finalized.
+
+Anyone can re-verify this attestation by fetching the manifest from
+Walrus and recomputing SHA-256 against the on-chain anchor.

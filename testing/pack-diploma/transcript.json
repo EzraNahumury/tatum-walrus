@@ -1,0 +1,18 @@
+{
+  "student_id": "ACME-2022-1834",
+  "student_name": "Garry Doe",
+  "program": "BSc Computer Science",
+  "graduation_date": "2026-04-15",
+  "honours": "First-Class",
+  "gpa": 3.92,
+  "credits_earned": 144,
+  "credits_required": 144,
+  "courses": [
+    { "code": "CS101", "title": "Intro to Algorithms", "credits": 4, "grade": "A" },
+    { "code": "CS205", "title": "Data Structures", "credits": 4, "grade": "A+" },
+    { "code": "CS305", "title": "Distributed Systems", "credits": 4, "grade": "A+" },
+    { "code": "CS411", "title": "Cryptography", "credits": 4, "grade": "A" },
+    { "code": "CS420", "title": "Blockchain Engineering", "credits": 4, "grade": "A+" },
+    { "code": "MATH301", "title": "Linear Algebra", "credits": 3, "grade": "A-" }
+  ]
+}

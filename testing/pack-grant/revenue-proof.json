@@ -1,0 +1,18 @@
+{
+  "currency": "USD",
+  "as_of": "2026-05-24",
+  "company": "Acme AI",
+  "mrr": {
+    "q1_2026": 12000,
+    "q2_2026": 18500,
+    "q3_2026_projected": 27000
+  },
+  "projected_arr_q4_2026": 420000,
+  "burn_rate_monthly": 9500,
+  "runway_months": 14,
+  "customers": {
+    "design_partners": 12,
+    "paying_pilots": 3,
+    "active_packs_created": 847
+  }
+}

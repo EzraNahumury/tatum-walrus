@@ -1,0 +1,18 @@
+FOUNDER ATTESTATION
+
+I, Garry Doe, founder and CEO of Acme AI, attest that all figures and
+statements contained in this ProofPack are true and accurate to the best
+of my knowledge as of 2026-05-24.
+
+Specifically:
+- Revenue figures in revenue-proof.json are pulled from Stripe.
+- Customer counts are validated against our internal CRM.
+- Roadmap dates are committed targets, not guarantees.
+
+This attestation is signed by my Sui address and anchored on testnet
+through Tatum RPC. The on-chain hash makes any subsequent edit detectable.
+
+Signed,
+Garry Doe
+CEO, Acme AI
+0x8c4551885e339c4b2cd88cb96f0fe34186a5a1dd03667957187c257c02e88776

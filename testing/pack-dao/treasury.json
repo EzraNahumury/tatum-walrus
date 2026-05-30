@@ -1,0 +1,20 @@
+{
+  "as_of": "2026-03-31",
+  "dao": "Acme DAO",
+  "treasury": {
+    "balance_sui": 142000,
+    "balance_usdc": 285000,
+    "wrapped_btc": 1.42,
+    "wrapped_eth": 38.7
+  },
+  "outflows_q1_2026": [
+    { "to": "grants-pool", "amount_usdc": 45000, "tx": "0x4a2b..." },
+    { "to": "contributor-payouts", "amount_usdc": 28000, "tx": "0x91f0..." },
+    { "to": "infra-vercel-tatum", "amount_usdc": 4200, "tx": "0x8c45..." },
+    { "to": "audit-firm", "amount_usdc": 18000, "tx": "0xe7d9..." }
+  ],
+  "inflows_q1_2026": {
+    "fees_collected_usdc": 31500,
+    "grants_received_usdc": 50000
+  }
+}
